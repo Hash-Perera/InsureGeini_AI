@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 import os
 from services.driving_license import detect_face_compare, read_id_card
 from services.insurance_card import read_insurance_card
+from services.damage_compare import damage_compare
 
 
 app = FastAPI()
@@ -142,5 +143,46 @@ async def detect_insurance_card(file1: UploadFile = File(...)):
         # Cleanup temporary files
         if image_path and os.path.exists(image_path):
             os.remove(image_path)
+            
 
+@app.post("/compare-damage")
+async def compare_damage(file1: UploadFile = File(...), file2: UploadFile = File(...)):
+    image_path_1 = None
+    image_path_2 = None
+    try:
+        # Save uploaded files
+        image_path_1 = os.path.join(TEMP_DIR, file1.filename)
+        image_path_2 = os.path.join(TEMP_DIR, file2.filename)
+        with open(image_path_1, "wb") as buffer:
+            buffer.write(file1.file.read())
+        with open(image_path_2, "wb") as buffer:
+            buffer.write(file2.file.read())
+
+        # Call the service function
+        result = damage_compare(image_path_1, image_path_2)
+
+        # Validate the service function's response
+        if not result["status"]:
+            return JSONResponse(content=result, status_code=400)
+
+        # Return success response
+        return JSONResponse(content=result, status_code=200)
+
+    except Exception as e:
+        # Handle unexpected errors
+        return JSONResponse(
+            content={
+                "status": False,
+                "error": f"An unexpected error occurred: {str(e)}",
+                "similarity_score": None,
+                "message": None
+            },
+            status_code=500
+        )
+
+    finally:
+        # Cleanup temporary files
+        for file_path in [image_path_1, image_path_2]:
+            if file_path and os.path.exists(file_path):
+                os.remove(file_path)
 
