@@ -1,7 +1,7 @@
 # InsureGeini_AI
 
 Branching Model
-![Archtecture Diagram](./images/branch.jpg)
+![Branching Model](./images/branch.png)
 
 Architecture Diagram
 
