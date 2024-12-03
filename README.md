@@ -1,4 +1,5 @@
 # InsureGeini_AI
 
-V1.0.0
+Architecture Diagram
+
 ![Archtecture Diagram](./images/architecture.jpg)
