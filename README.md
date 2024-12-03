@@ -1,4 +1,6 @@
-# InsureGeini_AI | V1.0.0
+# Harnessing Multi-Modal AI for an Automated Vehicle Insurance Solution | V1.0.0
+
+Research Group - 24-25J-321
 
 Branching Model
 
