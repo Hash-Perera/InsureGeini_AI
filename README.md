@@ -1,6 +1,4 @@
-# InsureGeini_AI
-
-# Version 1.0.0
+# InsureGeini_AI | V1.0.0
 
 Branching Model
 ![Branching Model](./images/branch.png)
