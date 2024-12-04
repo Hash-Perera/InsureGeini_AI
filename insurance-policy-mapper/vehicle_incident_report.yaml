@@ -1,0 +1,40 @@
+acknowledgment:
+  driver_signature: John Doe, 2024-12-01T19:00:00
+  fleet_manager_signature: Alice Johnson, 2024-12-01T19:05:00
+audit:
+  damage_details:
+    damage_cause: Slippery roads
+    damage_severity: Moderate
+    incident_date_time: '2024-12-01T18:45:00'
+    incident_description: ' The incident occurred at Main Street, City, Country during
+      Rainy weather . The damage is Moderate due to Slippery roads . The other car
+      in front of him was also damaged . No one was injured in the accident . The
+      incident was caused by a collision on Main Street .'
+    incident_location:
+      address: Main Street, City, Country
+      latitude: '37.7749'
+      longitude: '-122.4194'
+    photo_sketch: ''
+    photos_surrounding: []
+    photos_vehicle_damage: []
+    weather_condition: Rainy
+  general_information:
+    driver_name: John Doe
+    driver_phone: 123-456-7890
+    photo_driver_license: https://example.com/driver_license.jpg
+  other_party_involved: {}
+  witnesses:
+  - name: Jane Doe
+    phone: 987-654-3210
+    statement: I saw the car sliding due to rain.
+  - name: Mark Smith
+    phone: 123-789-4560
+    statement: The road was very slippery.
+fleet_manager_name: Alice Johnson
+media_summary: []
+registration_number: XYZ1234
+report_date_time: '2024-12-01T18:45:00'
+summary:
+  comments: The driver was not injured and was immediately able to report the incident.
+vin: 1HGBH41JXMN109186
+year_make_model: 2020 Honda Civic

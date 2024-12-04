@@ -1,0 +1,67 @@
+registration_number: "<Vehicle Registration Number>"
+vin: "<Vehicle Identification Number>"
+year_make_model: "<Vehicle Year, Make & Model>"
+report_date_time: "<Report Date and Time>"
+fleet_manager_name: "<Fleet Manager's Name>"
+
+audit:
+  general_information:
+    driver_name: "<Driver's Name>"
+    photo_driver_license: "<URL or Placeholder for Driver's License Photo>"
+    driver_phone: "<Driver's Phone Number>"
+
+  damage_details:
+    incident_date_time: "<Date and Time of Incident>"
+    incident_location:
+      address: "<Location Address>"
+      coordinates:
+        latitude: "<Latitude>"
+        longitude: "<Longitude>"
+    weather_condition: "<Weather Condition>"
+    damage_severity: "<Degree of Vehicle Damage>"
+    damage_cause: "<Cause of Damage>"
+    incident_description: "<Detailed Description of the Incident>"
+    photos_vehicle_damage:
+      - "<URL or Placeholder for Photo 1>"
+      - "<URL or Placeholder for Photo 2>"
+      - "<URL or Placeholder for Photo 3>"
+    photo_sketch: "<URL or Placeholder for Incident Sketch>"
+    photos_surrounding:
+      - "<URL or Placeholder for Surrounding Photo 1>"
+      - "<URL or Placeholder for Surrounding Photo 2>"
+
+  other_party_involved:
+    name: "<Name of Other Party Involved>"
+    photo_driver_license: "<URL or Placeholder for Other Driver's License Photo>"
+    phone: "<Other Driver's Phone Number>"
+    vehicle_details:
+      make_model: "<Other Vehicle Make and Model>"
+      registration_number: "<Other Vehicle Registration Number>"
+      vin: "<Other Vehicle VIN>"
+      photos_vehicle_damage:
+        - "<URL or Placeholder for Other Vehicle Photo 1>"
+        - "<URL or Placeholder for Other Vehicle Photo 2>"
+      damage_severity: "<Degree of Damage to Other Vehicle>"
+
+  witnesses:
+    - name: "<Witness 1 Name>"
+      statement: "<Witness 1 Statement>"
+      phone: "<Witness 1 Phone Number>"
+    - name: "<Witness 2 Name>"
+      statement: "<Witness 2 Statement>"
+      phone: "<Witness 2 Phone Number>"
+
+summary:
+  comments: "<Additional Comments About the Incident>"
+
+acknowledgment:
+  driver_signature: "<Driver's Name and Timestamp>"
+  fleet_manager_signature: "<Fleet Manager's Name and Timestamp>"
+
+media_summary:
+  - photo: "<URL or Placeholder for Media Photo 1>"
+    description: "<Description of Media Photo 1>"
+  - photo: "<URL or Placeholder for Media Photo 2>"
+    description: "<Description of Media Photo 2>"
+  - photo: "<URL or Placeholder for Media Photo 3>"
+    description: "<Description of Media Photo 3>"
