@@ -4,11 +4,13 @@ Research Group - 24-25J-321
 
 Branching Model
 
-![Branching Model](./images/branch.png)
+![branch](https://github.com/user-attachments/assets/4bbbab97-5a32-4476-88a2-01745d584e02)
+
 
 Architecture Diagram
 
-![Archtecture Diagram](./images/architecture.jpg)
+![architecture](https://github.com/user-attachments/assets/79218cca-06ad-4ae7-b168-257919e0e0ec)
+
 
 Product Repositories.
 
