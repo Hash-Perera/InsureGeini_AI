@@ -11,6 +11,7 @@ Architecture Diagram
 ![Archtecture Diagram](./images/architecture.jpg)
 
 Product Repositories.
+
 Flask Server - https://github.com/Hash-Perera/InsureGeini_AI
 
 Mobile application - https://github.com/Hash-Perera/InsureGeini_Mobile
