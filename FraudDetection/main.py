@@ -9,8 +9,6 @@ import os
 from services.s_driving_licence import face_compare, read_license
 from services.s_insurance_card import read_insurance_card, read_number_plates
 from services.s_damage_compare import damage_compare
-
-
 from database import claim_collection, verify_connection
 from bson import ObjectId
 from services.aws import download_file_from_url
@@ -29,7 +27,7 @@ async def ping():
     return "Hello, I am alive!"
 
 #   claimId = "6794d1984da59d677ddd3ec7"
-# This is the real function that will be called when the script is run
+#!----------- This is the real function that will be called when the script is run ------------//
 @app.get("/execute-fraud-detection")
 async def execute_fraud_detection():
     claimId = "6794d1984da59d677ddd3ec7"
@@ -45,33 +43,41 @@ async def execute_fraud_detection():
         claim = convert_bson_to_json(claim)
 
       
+        #? This files should be downloaded from the DB Document. 
         license_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_L.jpg")
         driver_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_S_Cropped.jpg")
         insurance_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/IncCard.jpg")
         license_plates = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/V_5.jpg")
+        url_set_1 = [
+            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+        ]
+
+        url_set_2 = [
+            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+        ]
         
         #! Detect Face Logic
         faceResult = face_compare(license_path, driver_path)
-
         if not faceResult["status"]:
             return JSONResponse(content=faceResult, status_code=400)
         
-        
         #! Read License Logic
-
         readLicenceResult = read_license(license_path)
-
         if not readLicenceResult["status"]:
             return JSONResponse(content=readLicenceResult, status_code=400)
         
         #! Read Insurance Card Logic
         readInsuranceResult = read_insurance_card(insurance_path)
-        
         if not readInsuranceResult["status"]:
             return JSONResponse(content=readInsuranceResult, status_code=400)
         
         #! Compare Number Plates Logic
         readNumberPlateResult = read_number_plates(license_plates)
+
+        #! compare images
+        similarity_score = damage_compare(url_set_1, url_set_2)
         
 
 
@@ -80,7 +86,8 @@ async def execute_fraud_detection():
             "face_result": faceResult , 
             "read_licence_result": readLicenceResult , 
             "read_insurance_result": readInsuranceResult, 
-            "number_plates": readNumberPlateResult   
+            "number_plates": readNumberPlateResult,   
+            "similarity_score": similarity_score
             }
         
 
