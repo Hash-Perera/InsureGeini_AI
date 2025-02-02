@@ -5,8 +5,9 @@
 class AiPipeline:
     
     #change individual model instantiation for dynamic later
-    def __init__(self,detector):
+    def __init__(self,detector,segmenter):
         self.detector = detector
+        self.segmenter = segmenter
 
     
     def process_image(self,image_path):
@@ -16,5 +17,8 @@ class AiPipeline:
         #Make this dynamic later
         detection_results = self.detector.predict(image_path)
         print(detection_results)
+
+        segmentation_results = self.segmenter.predict(image_path)
+        print(segmentation_results)
 
         #Post process

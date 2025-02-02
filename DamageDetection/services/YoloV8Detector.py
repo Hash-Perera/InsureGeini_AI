@@ -13,6 +13,6 @@ class YoloV8Detector(BaseModel):
 #Remaining filter out and return only the required, search what is only needed.
     def predict(self, image):
         self.results = self.model(image)
-        print(self.results)
+        #print(self.results)
         return {"detections": "Object detection results"}
     
