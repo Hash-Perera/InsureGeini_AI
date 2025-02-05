@@ -30,9 +30,10 @@ async def ping():
 #!----------- This is the real function that will be called when the script is run ------------//
 @app.get("/execute-fraud-detection")
 async def execute_fraud_detection():
-    claimId = "6794d1984da59d677ddd3ec7"
+    claimId = "67a1cacfeace4f9501a8c964"
 
     try:
+        # Find the claim in the database
         if not ObjectId.is_valid(claimId):
             raise HTTPException(status_code=400, detail="Invalid claim ID format")
         claim = await claim_collection.find_one({"_id": ObjectId(claimId)})
@@ -43,15 +44,26 @@ async def execute_fraud_detection():
         claim = convert_bson_to_json(claim)
 
       
-        #? This files should be downloaded from the DB Document. 
-        license_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_L.jpg")
-        driver_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_S_Cropped.jpg")
-        insurance_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/IncCard.jpg")
-        license_plates = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/V_5.jpg")
-        url_set_1 = [
-            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
-            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
-        ]
+        # #? This files should be downloaded from the DB Document. 
+        # license_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_L.jpg")
+        # driver_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/Dad_S_Cropped.jpg")
+        # insurance_path = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/IncCard.jpg")
+        # license_plates = download_file_from_url("https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/V_5.jpg")
+        # url_set_1 = [
+        #     'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+        #     'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+        # ]
+
+        # url_set_2 = [
+        #     'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+        #     'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+        # ]
+
+        license_path = download_file_from_url(claim["drivingLicenseFront"])
+        driver_path = download_file_from_url(claim["driverFace"])
+        insurance_path = download_file_from_url(claim["insuranceFront"])
+        license_plates = download_file_from_url(claim["backLicencePlate"])
+        url_set_1 = claim["damageImages"]
 
         url_set_2 = [
             'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
@@ -95,10 +107,11 @@ async def execute_fraud_detection():
         raise HTTPException(status_code=500, detail=f"Failed to fetch claim: {e}")
     
     finally:
-        # Cleanup temporary files
-        for file_path in [license_path, driver_path, insurance_path, license_plates]:
-            if os.path.exists(file_path):
-                os.remove(file_path)
+        print("Cleaning up")
+        # # Cleanup temporary files
+        # for file_path in [license_path, driver_path, insurance_path, license_plates]:
+        #     if os.path.exists(file_path):
+        #         os.remove(file_path)
     
 
     
