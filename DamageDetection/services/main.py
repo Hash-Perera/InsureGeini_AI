@@ -1,22 +1,31 @@
-from YoloV8Detector import YoloV8Detector
-from YoloV8Segmenter import YoloV8Segmenter
+from inference.YoloV8Detector import YoloV8Detector
+from inference.YoloV8Segmenter import YoloV8Segmenter
+from inference.VggClassifire import VggClassifire
+from utils.PreProcess import PreProcess
+from utils.PostProcess import PostProcess
 from AiPipeline import AiPipeline
 
 #instantiate models
 detector = YoloV8Detector()
 segmenter = YoloV8Segmenter()
+classifire = VggClassifire()
 
 
 #loading models
-detector_path = '../AI_Modles/YoloV8Detection.pt'
-detector.load_model(detector_path)
+detector.load_model('../AI_Modles/YoloV8Detection.pt')
 
 segmenter.load_model('../AI_Modles/YoloV8Segmentation.pt')
+
+classifire.load_model('../AI_Modles/Vgg16Classification.h5')
+
+
 #instsantiate pipeline components
+preprocessor = PreProcess()
+postprocessor = PostProcess()
 
 
 #Create pipleine
-pipeline = AiPipeline(detector,segmenter)
+pipeline = AiPipeline(models=[detector,segmenter,classifire], preprocessor=preprocessor, postprocessor=postprocessor)
 
 
 #process an image
