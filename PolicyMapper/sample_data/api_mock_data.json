@@ -1,0 +1,55 @@
+{
+    "vehicle_reg": "NTJ 455",
+    "vin": "7HGSA1DFGT14554",
+    "make_model": "2015 Toyota Prius",
+    "report_date": "2023-05-03",
+    "fleet_manager": "Ian Lee",
+    "driver_name": "John Smith",
+    "driver_phone": "(01632) 318210",
+    "incident_date": "2023-05-01 14:19 PST",
+    "location": {
+        "address": "Royal Festival Hall, 337-338 Belvedere Rd, London SE1 8XU, UK",
+        "coordinates": {
+            "latitude": 51.5057343,
+            "longitude": -0.1166231
+        }
+    },
+    "weather": "Clear, 18°C",
+    "damage_severity": "Severe",
+    "damage_cause": "Collision",
+    "incident_description": "John's vehicle was struck by another car at a traffic light. The front bumper and hood were severely damaged, and the engine was partially exposed.",
+    "other_party": {
+        "name": "Sarah Morgan",
+        "phone": "(0988) 777 8050",
+        "vehicle": {
+            "make_model": "2015 Land Rover Sport",
+            "registration": "BD51 SMR",
+            "vin": "GH1234AHIJ1DSF3FG"
+        },
+        "damage_severity": "Severe",
+        "witnesses": [
+            {
+                "name": "Anne Fulton",
+                "date": "2023-05-03 11:24 PST",
+                "statement": "I saw the collision while crossing the street. The Land Rover was speeding and lost control, hitting John's Prius from the side."
+            },
+            {
+                "name": "Jane Fulton",
+                "date": "2023-05-03 11:25 PST",
+                "statement": "I was inside John's car during the accident. The impact was strong, and the front bumper was completely crushed."
+            }
+        ]
+    },
+    "insurance_policy": {
+        "policy_number": "POL-2023-24567",
+        "coverage": "Full Comprehensive",
+        "deductible": "$500",
+        "policy_status": "Active",
+        "insurance_company": "Global Auto Insurance",
+        "claim_status": "Pending"
+    },
+    "driver_signature": "John Smith",
+    "driver_date": "2023-05-03",
+    "fleet_manager_signature": "Ian Lee",
+    "fleet_manager_date": "2023-05-03"
+}
