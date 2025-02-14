@@ -9,9 +9,8 @@
         h1 { color: #2E86C1; }
         .section { margin-bottom: 20px; }
         .footer { margin-top: 50px; font-size: 12px; text-align: center; color: #666; }
-        
-        .status-accepted { color: green; font-weight: bold; }
-        .status-rejected { color: red; font-weight: bold; }
+        .accepted { font-weight: bold; color: green; }
+        .rejected { font-weight: bold; color: red; }
     </style>
 </head>
 <body>
@@ -23,21 +22,22 @@
         <p><strong>Vehicle Registration:</strong> {{ report_data.vehicle_reg }}</p>
         <p><strong>Incident Date:</strong> {{ report_data.incident_date }}</p>
         <p><strong>Damage Cause:</strong> {{ report_data.damage_cause }}</p>
-        <p><strong>Estimated Repair Cost:</strong> ${{ report_data.estimated_repair_cost }}</p>
-        <!-- <p><strong>Policy Number:</strong> {{ report_data.insurance_policy.policy_number }}</p> -->
-        {% if report_data.insurance_policy %}
+        <p><strong>Estimated Repair Cost:</strong> ${{ report_data.estimated_repair_cost if report_data.estimated_repair_cost else "N/A" }}</p>
+    </div>
+
+    <div class="section">
+        {% if report_data.insurance_policy and "policy_number" in report_data.insurance_policy %}
             <p><strong>Policy Number:</strong> {{ report_data.insurance_policy.policy_number }}</p>
         {% else %}
             <p><strong>Policy Number:</strong> Unknown</p>
         {% endif %}
-
     </div>
 
     <div class="section">
         {% if decision.status == "Accepted" %}
-            {% set decision_class = "status-accepted" %}
+            {% set decision_class = "accepted" %}
         {% else %}
-            {% set decision_class = "status-rejected" %}
+            {% set decision_class = "rejected" %}
         {% endif %}
 
         <h2>Claim Status: <span class="{{ decision_class }}">{{ decision.status }}</span></h2>

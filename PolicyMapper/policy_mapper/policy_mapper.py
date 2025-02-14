@@ -1,69 +1,96 @@
 import json
 import os
+from langchain_ollama import OllamaLLM
+from langchain.prompts import PromptTemplate
 
 class PolicyMapper:
-    """Compares the generated damage report with extracted insurance policy rules."""
+    """Evaluates the generated damage report critically against extracted insurance policy rules using an LLM."""
 
-    def __init__(self, policy_file="policies.json"):
+    def __init__(self, policy_file="policies.json", model="llama3.2"):
         self.policy_file = policy_file
         self.policies = self.load_policies()
+        self.llm = OllamaLLM(model=model)  # Using LLM for claim evaluation
 
     def load_policies(self):
         """Loads extracted insurance policies from JSON."""
         if not os.path.exists(self.policy_file):
             print(f"⚠️ No policy file found: {self.policy_file}. Skipping policy check.")
-            return {}
+            return []
 
         try:
             with open(self.policy_file, 'r') as file:
                 policies = json.load(file)
-
-                # Convert list of policies to dictionary for faster lookup
-                if isinstance(policies, list):
-                    return {policy["policy_number"]: policy for policy in policies}
-                return policies
-
+                return policies if isinstance(policies, list) else []
         except Exception as e:
             print(f"❌ Error loading policy file: {e}")
-            return {}
+            return []
 
     def evaluate_claim(self, report_data):
-        """Compares a claim with the insurance policy to determine acceptance."""
+        """Critically evaluates claim information against extracted policies using LLM."""
 
-        # Ensure `insurance_policy` key exists in report_data
+        # Ensure `insurance_policy` exists in report_data
         if "insurance_policy" not in report_data or not report_data["insurance_policy"]:
-            print("⚠️ No insurance policy found in report data. Setting default.")
             report_data["insurance_policy"] = {"policy_number": "Unknown"}
-            return {"status": "Rejected", "reason": "Missing insurance policy details"}
 
-        policy_number = report_data["insurance_policy"].get("policy_number")
+        # Prepare structured policy evaluation prompt
+        prompt_template = PromptTemplate(
+            input_variables=["claim_data", "policies"],
+            template="""
+            You are an expert in insurance claims. Analyze the following **insurance claim report** 
+            and compare it with the **insurance policies** provided. Your task is to determine if the claim should be 
+            **accepted or rejected**, providing a **detailed reason**.
 
-        if not policy_number or policy_number not in self.policies:
-            return {"status": "Rejected", "reason": f"Invalid or missing policy number: {policy_number}"}
+            **Claim Details:**
+            {claim_data}
 
-        policy = self.policies[policy_number]
+            **Extracted Insurance Policies:**
+            {policies}
 
-        # Check if damage type is covered
-        if report_data["damage_cause"] not in policy["covered_damage_types"]:
-            return {"status": "Rejected", "reason": f"Damage type '{report_data['damage_cause']}' is not covered"}
+            Consider the following factors:
+            - If no exact policy number matches, compare coverage details critically.
+            - Ensure the **damage cause is covered** under at least one policy.
+            - Ensure the claim does **not fall under exclusions**.
+            - Ensure the **repair cost is within coverage limits**.
+            - Provide a **detailed reason** for the claim decision.
 
-        # Check exclusions
-        for exclusion in policy["exclusions"]:
-            if exclusion.lower() in report_data["incident_description"].lower():
-                return {"status": "Rejected", "reason": f"Claim falls under exclusion: {exclusion}"}
+            **Return a JSON response in the following format:**
+            ```json
+            {{
+                "status": "Accepted" or "Rejected",
+                "reason": "Detailed explanation of why the claim was accepted or rejected."
+            }}
+            ```
 
-        # Check coverage amount
-        estimated_cost = report_data.get("estimated_repair_cost", 0)
-        if estimated_cost > policy["max_coverage_amount"]:
-            return {"status": "Rejected", "reason": "Repair cost exceeds policy coverage limit"}
+            Ensure strict JSON formatting with no extra text.
+            """
+        )
 
-        return {"status": "Accepted", "reason": "Claim meets all policy conditions"}
+        # Format claim details and policies
+        formatted_prompt = prompt_template.format(
+            claim_data=json.dumps(report_data, indent=4),
+            policies=json.dumps(self.policies, indent=4)
+        )
+
+        # Invoke the LLM for claim evaluation
+        response = self.llm.invoke(formatted_prompt)
+
+        # Parse the LLM response
+        try:
+            decision = json.loads(response.strip())
+            if "status" in decision and "reason" in decision:
+                return decision
+            else:
+                print("Error: LLM response missing required fields.")
+                return {"status": "Rejected", "reason": "LLM failed to provide a structured explanation."}
+        except json.JSONDecodeError:
+            print("Error: Failed to parse LLM response.")
+            return {"status": "Rejected", "reason": "Error processing claim evaluation."}
 
 # Example Usage
 if __name__ == "__main__":
     sample_claim = {
-        "insurance_policy": {"policy_number": "ABC123"},
-        "damage_cause": "Accidents",
+        "insurance_policy": {"policy_number": "UNKNOWN123"},
+        "damage_cause": "Collision",
         "incident_description": "The car was hit while parked at a red light.",
         "estimated_repair_cost": 8000
     }

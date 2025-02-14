@@ -1,54 +1,51 @@
 [
     {
-        "policy_number": "ABC123",
-        "coverage": "Comprehensive Motor Insurance",
-        "max_coverage_amount": 500000,
-        "covered_damage_types": [
-            "Fire",
-            "Theft",
-            "Accidental Damage"
-        ],
-        "deductible": 25000,
-        "exclusions": [
-            "Tipping or operation as a tool of trade",
-            "Working risks/overturning risks"
-        ]
-    },
-    {
-        "policy_number": "DEF456",
-        "coverage": "Third Party Liability Motor Insurance",
+        "policy_number": "P001",
+        "coverage": "Comprehensive",
         "max_coverage_amount": 1000000,
         "covered_damage_types": [
-            "Death",
-            "Bodily Injury to Third Parties"
+            "Accident",
+            "Theft",
+            "Natural Disaster"
         ],
         "deductible": 50000,
         "exclusions": [
-            "Passenger Indemnity (Ambulance & Hearses)"
+            "Self-ignition"
         ]
     },
     {
-        "policy_number": "GHI789",
-        "coverage": "Passenger Indemnity Motor Insurance",
-        "max_coverage_amount": 200000,
+        "policy_number": "P002",
+        "coverage": "Third Party Liability",
+        "max_coverage_amount": 500000,
         "covered_damage_types": [
-            "Death",
-            "Bodily Injury to Passengers"
+            "Passenger",
+            "Other Road Users"
         ],
         "deductible": 10000,
         "exclusions": []
     },
     {
-        "policy_number": "JKL012",
-        "coverage": "Special Type Clause Motor Insurance",
-        "max_coverage_amount": 300000,
+        "policy_number": "P003",
+        "coverage": "Special Type Clause",
+        "max_coverage_amount": 2000000,
         "covered_damage_types": [
-            "Working risks/overturning risks",
-            "Trailers"
+            "Ambulance",
+            "Hearses"
         ],
-        "deductible": 15000,
+        "deductible": 10000,
         "exclusions": [
-            "Passenger Indemnity (Ambulance & Hearses)"
+            "Food poisoning"
         ]
+    },
+    {
+        "policy_number": "P004",
+        "coverage": "Trailer Coverage",
+        "max_coverage_amount": 500000,
+        "covered_damage_types": [
+            "Trailer",
+            "Cargo"
+        ],
+        "deductible": 20000,
+        "exclusions": []
     }
 ]
