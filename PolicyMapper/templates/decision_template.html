@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claim Decision Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 40px; }
+        h1 { color: #2E86C1; }
+        .section { margin-bottom: 20px; }
+        .footer { margin-top: 50px; font-size: 12px; text-align: center; color: #666; }
+        
+        .status-accepted { color: green; font-weight: bold; }
+        .status-rejected { color: red; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Insurance Claim Decision</h1>
+
+    <div class="section">
+        <p><strong>Driver:</strong> {{ report_data.driver_name }}</p>
+        <p><strong>Vehicle Registration:</strong> {{ report_data.vehicle_reg }}</p>
+        <p><strong>Incident Date:</strong> {{ report_data.incident_date }}</p>
+        <p><strong>Damage Cause:</strong> {{ report_data.damage_cause }}</p>
+        <p><strong>Estimated Repair Cost:</strong> ${{ report_data.estimated_repair_cost }}</p>
+        <!-- <p><strong>Policy Number:</strong> {{ report_data.insurance_policy.policy_number }}</p> -->
+        {% if report_data.insurance_policy %}
+            <p><strong>Policy Number:</strong> {{ report_data.insurance_policy.policy_number }}</p>
+        {% else %}
+            <p><strong>Policy Number:</strong> Unknown</p>
+        {% endif %}
+
+    </div>
+
+    <div class="section">
+        {% if decision.status == "Accepted" %}
+            {% set decision_class = "status-accepted" %}
+        {% else %}
+            {% set decision_class = "status-rejected" %}
+        {% endif %}
+
+        <h2>Claim Status: <span class="{{ decision_class }}">{{ decision.status }}</span></h2>
+        <p><strong>Reason:</strong> {{ decision.reason }}</p>
+    </div>
+
+    <div class="footer">
+        Private & Confidential | Insurance Decision Report
+    </div>
+
+</body>
+</html>

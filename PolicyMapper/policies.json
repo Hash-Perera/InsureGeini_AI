@@ -1,0 +1,54 @@
+[
+    {
+        "policy_number": "ABC123",
+        "coverage": "Comprehensive Motor Insurance",
+        "max_coverage_amount": 500000,
+        "covered_damage_types": [
+            "Fire",
+            "Theft",
+            "Accidental Damage"
+        ],
+        "deductible": 25000,
+        "exclusions": [
+            "Tipping or operation as a tool of trade",
+            "Working risks/overturning risks"
+        ]
+    },
+    {
+        "policy_number": "DEF456",
+        "coverage": "Third Party Liability Motor Insurance",
+        "max_coverage_amount": 1000000,
+        "covered_damage_types": [
+            "Death",
+            "Bodily Injury to Third Parties"
+        ],
+        "deductible": 50000,
+        "exclusions": [
+            "Passenger Indemnity (Ambulance & Hearses)"
+        ]
+    },
+    {
+        "policy_number": "GHI789",
+        "coverage": "Passenger Indemnity Motor Insurance",
+        "max_coverage_amount": 200000,
+        "covered_damage_types": [
+            "Death",
+            "Bodily Injury to Passengers"
+        ],
+        "deductible": 10000,
+        "exclusions": []
+    },
+    {
+        "policy_number": "JKL012",
+        "coverage": "Special Type Clause Motor Insurance",
+        "max_coverage_amount": 300000,
+        "covered_damage_types": [
+            "Working risks/overturning risks",
+            "Trailers"
+        ],
+        "deductible": 15000,
+        "exclusions": [
+            "Passenger Indemnity (Ambulance & Hearses)"
+        ]
+    }
+]

@@ -1,9 +1,7 @@
 import json
 import os
-import ollama
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 from langchain.prompts import PromptTemplate
-from langchain.chains import LLMChain
 
 class DataCollector:
     """Collects and structures all necessary data for the vehicle damage report."""
@@ -13,7 +11,7 @@ class DataCollector:
         self.external_data = self.load_external_data(external_data_path)
         self.witness_statements = witness_statements
         self.images = images
-        self.llm = Ollama(model="llama3.2")  # Connect to Ollama
+        self.llm = OllamaLLM(model="llama3.2")  # Updated to latest Ollama integration
 
     def load_external_data(self, file_path):
         """Loads external API data from a JSON file."""
@@ -26,6 +24,8 @@ class DataCollector:
 
     def generate_summary(self):
         """Generates a summary using Ollama with LangChain."""
+        
+        # Define a structured prompt
         prompt_template = PromptTemplate(
             input_variables=["incident", "witnesses"],
             template="""
@@ -35,14 +35,25 @@ class DataCollector:
             Witness Statements: {witnesses}
 
             Provide a clear, professional summary. Do not include any placeholders or variables in the summary.
-            Do not inlude text formattings.
+            Do not include text formatting.
             """
         )
 
-        llm_chain = LLMChain(llm=self.llm, prompt=prompt_template)
-        response = llm_chain.run(incident=self.transcript, witnesses=', '.join([w['statement'] for w in self.witness_statements]))
+        # Format the prompt properly
+        formatted_prompt = prompt_template.format(
+            incident=self.transcript,
+            witnesses=', '.join([w['statement'] for w in self.witness_statements])
+        )
 
-        return response.strip()
+        # Directly invoke Ollama LLM and process the response
+        response = self.llm.invoke(formatted_prompt)
+
+        # Ensure response is a string and clean it up
+        if isinstance(response, str):
+            return response.strip()
+        else:
+            print("Error: Unexpected response format from Ollama.")
+            return "Summary unavailable due to an error."
 
     def collect_report_data(self):
         """Aggregates all report data into a structured dictionary."""
@@ -69,3 +80,16 @@ class DataCollector:
             "fleet_manager_date": self.external_data.get("fleet_manager_date", "N/A"),
             "photos": self.images
         }
+
+# Example Usage
+if __name__ == "__main__":
+    transcript = "The car was hit while stopped at a traffic light. The front bumper and headlights were damaged."
+    witness_statements = [
+        {"name": "Anne Fulton", "date": "03.05.2023", "statement": "I saw the accident happen..."},
+        {"name": "Jane Fulton", "date": "03.05.2023", "statement": "The other driver was speeding..."}
+    ]
+    images = ["sample_images/photo1.jpg", "sample_images/photo2.jpg"]
+
+    collector = DataCollector(transcript, "sample_data/api_mock_data.json", witness_statements, images)
+    report_data = collector.collect_report_data()
+    print(json.dumps(report_data, indent=4))

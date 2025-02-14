@@ -41,7 +41,7 @@
         ]
     },
     "insurance_policy": {
-        "policy_number": "POL-2023-24567",
+        "policy_number": "P001",
         "coverage": "Full Comprehensive",
         "deductible": "$500",
         "policy_status": "Active",
