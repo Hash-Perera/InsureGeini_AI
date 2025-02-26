@@ -2,13 +2,18 @@ from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
 import os
+from PIL import Image
 
 # from services.driving_license import detect_face_compare, read_id_card
 # from services.insurance_card import read_insurance_card
 # from services.damage_compare import damage_compare
+
 from services.s_driving_licence import face_compare, read_license
 from services.s_insurance_card import read_insurance_card, read_number_plates
 from services.s_damage_compare import damage_compare
+from services.s_color_verification import detect_vehicle_color
+from services.z_detector import excute_fraud_detector
+
 from database import claim_collection, verify_connection
 from bson import ObjectId
 from services.aws import download_file_from_url
@@ -108,10 +113,10 @@ async def execute_fraud_detection():
     
     finally:
         print("Cleaning up")
-        # # Cleanup temporary files
-        # for file_path in [license_path, driver_path, insurance_path, license_plates]:
-        #     if os.path.exists(file_path):
-        #         os.remove(file_path)
+        # Cleanup temporary files
+        for file_path in [license_path, driver_path, insurance_path, license_plates]:
+            if os.path.exists(file_path):
+                os.remove(file_path)
     
 
     
@@ -288,6 +293,42 @@ async def execute_fraud_detection():
 #             if file_path and os.path.exists(file_path):
 #                 os.remove(file_path)
 
+# # API endpoint for image classification
+# @app.post("/predict-model")
+# async def predict_image(file: UploadFile = File(...)):
+#     """
+#     Accepts an image file and returns the predicted class with confidence.
+#     """
+#     image_bytes = await file.read()
+#     image = Image.open(io.BytesIO(image_bytes)).convert("RGB")
+#     return predict_vehicle_class(image)
+
+
+@app.post('/detect-color')
+def detect_color(file1: UploadFile = File(...)):
+    try:
+        image_path = os.path.join(TEMP_DIR, file1.filename)
+
+        with open(image_path, "wb") as buffer:
+            buffer.write(file1.file.read())
+
+        # Process the image to detect color
+        detected_color = detect_vehicle_color(image_path)
+
+        return detected_color
+
+    except Exception as e:
+        return JSONResponse(content={"error": str(e)}, status_code=500)
+    
+    finally:
+        # Cleanup temporary files
+        if image_path and os.path.exists(image_path):
+            os.remove(image_path)
+
+@app.get("/excute-fraud-detection")
+async def excute_fraud_detection():
+    claimId = "67a1cacfeace4f9501a8c964"
+    return await excute_fraud_detector(claimId);
 
 def convert_bson_to_json(document):
     """
