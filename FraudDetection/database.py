@@ -1,8 +1,12 @@
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ServerSelectionTimeoutError
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
 
 # MongoDB Connection String
-MONGO_URI = "mongodb+srv://vhprabhathperera222:aycSTwnGqfIfHAYZ@clusterhash.fxzh5ya.mongodb.net/InsureGeini?retryWrites=true&w=majority"
+MONGO_URI = os.getenv("MONGODB_URI")
 
 # Create a MongoDB client
 client = AsyncIOMotorClient(MONGO_URI)
