@@ -1,3 +1,5 @@
+import asyncio
+from contextlib import asynccontextmanager
 from fastapi import FastAPI, File, UploadFile, HTTPException
 from fastapi.responses import JSONResponse
 from fastapi.encoders import jsonable_encoder
@@ -18,20 +20,57 @@ from database import claim_collection, verify_connection
 from bson import ObjectId
 from services.aws import download_file_from_url
 
+from services.queue_service import start_fraud_consumer
 
-app = FastAPI()
+
+
+def convert_bson_to_json(document):
+    """
+    Recursively converts MongoDB BSON types to JSON-serializable types.
+    Handles ObjectId and nested structures.
+    """
+    if isinstance(document, dict):
+        return {key: convert_bson_to_json(value) for key, value in document.items()}
+    elif isinstance(document, list):
+        return [convert_bson_to_json(item) for item in document]
+    elif isinstance(document, ObjectId):
+        return str(document)  # Convert ObjectId to string
+    else:
+        return document
+    
+
+# app = FastAPI()
+# TEMP_DIR = "temp"
+# os.makedirs(TEMP_DIR, exist_ok=True)
+
+# @app.on_event("startup")
+# async def startup_event():
+#     await verify_connection()
+#     start_fraud_consumer()
+
+# Create temp directory
 TEMP_DIR = "temp"
 os.makedirs(TEMP_DIR, exist_ok=True)
 
-@app.on_event("startup")
-async def startup_event():
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handles app startup and shutdown events."""
+    # Ensure the database connection is verified
     await verify_connection()
+    # Start fraud queue consumer in the background
+    task = asyncio.create_task(start_fraud_consumer())
+    yield  # Allow FastAPI to run
+    # Cleanup if necessary (optional)
+    task.cancel()
+
+# Initialize FastAPI app with lifespan
+app = FastAPI(lifespan=lifespan)
     
 @app.get("/")
-async def ping():
-    return "Hello, I am alive!"
+async def healthCheck():
+    return "Hello, Fraud Detection Server is running!"
 
-#   claimId = "6794d1984da59d677ddd3ec7"
 #!----------- This is the real function that will be called when the script is run ------------//
 @app.get("/execute-fraud-detection")
 async def execute_fraud_detection():
@@ -117,10 +156,22 @@ async def execute_fraud_detection():
         for file_path in [license_path, driver_path, insurance_path, license_plates]:
             if os.path.exists(file_path):
                 os.remove(file_path)
-    
 
-    
+@app.get("/excute-fraud-detection")
+async def excute_fraud_detection():
+    claimId = "67a1cacfeace4f9501a8c964"
+    return await excute_fraud_detector(claimId);
 
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8002)
+    # uvicorn.run("main:app", host="0.0.0.0", port=8002, reload=True)
+
+
+
+
+#? ----------------------------------------------------------------------------------------------
+#? ----------------------------------------------------------------------------------------------
 # @app.post("/detect-face")
 # async def detect_face(file1: UploadFile = File(...), file2: UploadFile = File(...)):
 #     try:
@@ -304,42 +355,23 @@ async def execute_fraud_detection():
 #     return predict_vehicle_class(image)
 
 
-@app.post('/detect-color')
-def detect_color(file1: UploadFile = File(...)):
-    try:
-        image_path = os.path.join(TEMP_DIR, file1.filename)
+# @app.post('/detect-color')
+# def detect_color(file1: UploadFile = File(...)):
+#     try:
+#         image_path = os.path.join(TEMP_DIR, file1.filename)
 
-        with open(image_path, "wb") as buffer:
-            buffer.write(file1.file.read())
+#         with open(image_path, "wb") as buffer:
+#             buffer.write(file1.file.read())
 
-        # Process the image to detect color
-        detected_color = detect_vehicle_color(image_path)
+#         # Process the image to detect color
+#         detected_color = detect_vehicle_color(image_path)
 
-        return detected_color
+#         return detected_color
 
-    except Exception as e:
-        return JSONResponse(content={"error": str(e)}, status_code=500)
+#     except Exception as e:
+#         return JSONResponse(content={"error": str(e)}, status_code=500)
     
-    finally:
-        # Cleanup temporary files
-        if image_path and os.path.exists(image_path):
-            os.remove(image_path)
-
-@app.get("/excute-fraud-detection")
-async def excute_fraud_detection():
-    claimId = "67a1cacfeace4f9501a8c964"
-    return await excute_fraud_detector(claimId);
-
-def convert_bson_to_json(document):
-    """
-    Recursively converts MongoDB BSON types to JSON-serializable types.
-    Handles ObjectId and nested structures.
-    """
-    if isinstance(document, dict):
-        return {key: convert_bson_to_json(value) for key, value in document.items()}
-    elif isinstance(document, list):
-        return [convert_bson_to_json(item) for item in document]
-    elif isinstance(document, ObjectId):
-        return str(document)  # Convert ObjectId to string
-    else:
-        return document
+#     finally:
+#         # Cleanup temporary files
+#         if image_path and os.path.exists(image_path):
+#             os.remove(image_path)
