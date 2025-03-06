@@ -52,6 +52,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 def healthCheck():
+    print('🟢 Sample server is running!')
     return {"status": "Hello! Sample server is running!"}
 
 if __name__ == "__main__":
