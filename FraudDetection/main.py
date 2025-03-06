@@ -37,16 +37,6 @@ def convert_bson_to_json(document):
         return str(document)  # Convert ObjectId to string
     else:
         return document
-    
-
-# app = FastAPI()
-# TEMP_DIR = "temp"
-# os.makedirs(TEMP_DIR, exist_ok=True)
-
-# @app.on_event("startup")
-# async def startup_event():
-#     await verify_connection()
-#     start_fraud_consumer()
 
 # Create temp directory
 TEMP_DIR = "temp"
@@ -135,8 +125,6 @@ async def execute_fraud_detection():
         #! compare images
         similarity_score = damage_compare(url_set_1, url_set_2)
         
-
-
         #? Return the results
         return { 
             "face_result": faceResult , 

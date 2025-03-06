@@ -1,7 +1,9 @@
+import os
 from motor.motor_asyncio import AsyncIOMotorClient
 from pymongo.errors import ServerSelectionTimeoutError
 from dotenv import load_dotenv
-import os
+from bson import ObjectId
+
 
 load_dotenv()
 
@@ -16,6 +18,7 @@ database = client.InsureGeini
 
 # Access the collection
 claim_collection = database.get_collection("claims")
+fraud_collection = database.get_collection("frauds")
 
 # Function to verify connection
 async def verify_connection():
@@ -25,4 +28,22 @@ async def verify_connection():
         print("MongoDB connection successful!")
     except ServerSelectionTimeoutError as e:
         print("MongoDB connection failed:", str(e))
+
+# Function to insert a document
+async def insert_to_fraud_collection(result, claim_id):
+    fraud_record = {
+        "claim_id": ObjectId(claim_id),
+        "model_result": result.get("model_result", {}),
+        "face_result": result.get("face_result", {}),
+        "read_licence_result": result.get("read_licence_result", {}),
+        "read_insurance_result": result.get("read_insurance_result", {}),
+        "number_plates": result.get("number_plates", "N/A"),
+        "similarity_score": result.get("similarity_score", {}),
+        "vin_number": result.get("vin_number", {}),
+        "color": result.get("color", "N/A"),
+    }
+    
+    result = await fraud_collection.insert_one(fraud_record)
+    print(f"Document inserted with ID: {result.inserted_id}")
+    return result.inserted_id;
 
