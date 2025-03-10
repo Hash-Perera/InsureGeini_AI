@@ -96,7 +96,7 @@ async def excute_fraud_detector(claimId):
             readNumberPlateResult = {
                 "status": False, 
                 "error": str(e), 
-                "insurace_Details": 'N/A'
+                "number_plate": 'N/A'
             }
 
         #! Read VIN number
@@ -400,14 +400,166 @@ def extract_driving_license_text(image_url):
         }
     
 def extract_number_plates(image_url):
-    print(image_url)
-    return 'N/A'
+    try:
+       
+        # Create assistant
+        assistant = client.beta.assistants.create(
+            name="Vehicle Licemce Plate OCR",
+            instructions="You are an OCR expert. Read license plate number. No explanation. response format is XXXXXXX or XXXXXX",
+            model="gpt-4o",
+            tools=[{"type": "code_interpreter"}]
+        )
+
+        # Create thread
+        thread = client.beta.threads.create()
+
+        # Add message with image
+        message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=[
+                {"type": "text", "text": "Extract text from this license plate"},
+                {"type": "image_url", "image_url": {"url": image_url}}
+            ]
+        )
+
+        # Run assistant
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id
+        )
+
+        # Wait for completion with a timeout mechanism
+        MAX_RETRIES = 30
+        retry_count = 0
+
+        while run.status not in ["completed", "failed", "cancelled"]:
+            if retry_count >= MAX_RETRIES:
+                return {
+                    "status": False, 
+                    "error": "The text extraction process took too long.", 
+                    "number_plate": 'N/A'
+                }
+                
+
+            time.sleep(2)
+            run = client.beta.threads.runs.retrieve(
+                thread_id=thread.id,
+                run_id=run.id
+            )
+            retry_count += 1
+
+        if run.status == "failed":
+            return {
+                "status": False, 
+                "error": "The text extraction process took too long.", 
+                "number_plate": 'N/A'
+            }
+            
+
+        # Get response
+        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        extracted_text = messages.data[0].content[0].text.value
+
+        return {
+            "status": True, 
+            "error": e, 
+            "number_plate": extracted_text
+        }
+
+
+    except Exception as e:
+        return {
+            "status": False, 
+            "error": e, 
+            "number_plate": 'N/A'
+        }
 
 def exraction_vin_number(image_url):
-    return 'N/A'
+    try:
+       
+        # Create assistant
+        assistant = client.beta.assistants.create(
+            name="Vehicle VIN number OCR",
+            instructions="You are an OCR expert. Read the VIN number of the image and provide the extracted text. No explanations. Response format is XXXXXXXXXXXXXXXXX",
+            model="gpt-4o",
+            tools=[{"type": "code_interpreter"}]
+        )
+
+        # Create thread
+        thread = client.beta.threads.create()
+
+        # Add message with image
+        message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=[
+                {"type": "text", "text": "Extract text from this VIN number image"},
+                {"type": "image_url", "image_url": {"url": image_url}}
+            ]
+        )
+
+        # Run assistant
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id
+        )
+
+        # Wait for completion with a timeout mechanism
+        MAX_RETRIES = 30
+        retry_count = 0
+
+        while run.status not in ["completed", "failed", "cancelled"]:
+            if retry_count >= MAX_RETRIES:
+                return {
+                    "status": False, 
+                    "error": "The text extraction process took too long.", 
+                    "vin_number": 'N/A'
+                }
+                
+
+            time.sleep(2)
+            run = client.beta.threads.runs.retrieve(
+                thread_id=thread.id,
+                run_id=run.id
+            )
+            retry_count += 1
+
+        if run.status == "failed":
+            return {
+                "status": False, 
+                "error": "The text extraction process took too long.", 
+                "vin_number": 'N/A'
+            }
+            
+
+        # Get response
+        messages = client.beta.threads.messages.list(thread_id=thread.id)
+        extracted_text = messages.data[0].content[0].text.value
+
+        return {
+            "status": True, 
+            "error": e, 
+            "vin_number": extracted_text
+        }
+
+
+    except Exception as e:
+        return {
+            "status": False, 
+            "error": e, 
+            "vin_number": 'N/A'
+        }
 
 def exraction_color(image_url):
-    return 'N/A'
+    try:
+        print(image_url)
+    except Exception as e:
+        return {
+            "status": False, 
+            "error": e, 
+            "color": 'N/A'
+        }
     
 
 

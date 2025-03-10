@@ -6,15 +6,12 @@ from fastapi.encoders import jsonable_encoder
 import os
 from PIL import Image
 
-# from services.driving_license import detect_face_compare, read_id_card
-# from services.insurance_card import read_insurance_card
-# from services.damage_compare import damage_compare
-
 from services.s_driving_licence import face_compare, read_license
-from services.s_insurance_card import read_insurance_card, read_number_plates
+from services.s_insurance_card import read_insurance_card, read_number_plates, read_VIN_number
 from services.s_damage_compare import damage_compare
 from services.s_color_verification import detect_vehicle_color
 from services.z_detector import excute_fraud_detector
+from services.s_vehicle_model_detection import predict_vehicle_class
 
 from database import claim_collection, verify_connection
 from bson import ObjectId
@@ -97,6 +94,8 @@ async def execute_fraud_detection():
         driver_path = download_file_from_url(claim["driverFace"])
         insurance_path = download_file_from_url(claim["insuranceFront"])
         license_plates = download_file_from_url(claim["backLicencePlate"])
+        color_detect_path = download_file_from_url(claim["frontLicencePlate"])
+        vin_number_path = download_file_from_url(claim["vinNumber"])
         url_set_1 = claim["damageImages"]
 
         url_set_2 = [
@@ -124,15 +123,27 @@ async def execute_fraud_detection():
 
         #! compare images
         similarity_score = damage_compare(url_set_1, url_set_2)
+
+        #! Car Model result
+        carModelResult = predict_vehicle_class(Image.open(license_path))
+
+        #! VIN Number
+        vinNumberResult = read_VIN_number(vin_number_path)
+
+        #! Color Detection
+        colorResult = detect_vehicle_color(color_detect_path)
         
         #? Return the results
         return { 
+            "model_result" : carModelResult,
             "face_result": faceResult , 
             "read_licence_result": readLicenceResult , 
             "read_insurance_result": readInsuranceResult, 
             "number_plates": readNumberPlateResult,   
-            "similarity_score": similarity_score
-            }
+            "similarity_score": similarity_score,
+            "vin_number": vinNumberResult,
+            "color": colorResult
+        }
         
 
     except Exception as e:
@@ -160,6 +171,10 @@ if __name__ == "__main__":
 
 #? ----------------------------------------------------------------------------------------------
 #? ----------------------------------------------------------------------------------------------
+# from services.driving_license import detect_face_compare, read_id_card
+# from services.insurance_card import read_insurance_card
+# from services.damage_compare import damage_compare
+
 # @app.post("/detect-face")
 # async def detect_face(file1: UploadFile = File(...), file2: UploadFile = File(...)):
 #     try:

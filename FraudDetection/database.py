@@ -40,7 +40,7 @@ async def insert_to_fraud_collection(result, claim_id):
         "number_plates": result.get("number_plates", "N/A"),
         "similarity_score": result.get("similarity_score", {}),
         "vin_number": result.get("vin_number", {}),
-        "color": result.get("color", "N/A"),
+        "color": result.get("color", {}),
     }
     
     result = await fraud_collection.insert_one(fraud_record)
