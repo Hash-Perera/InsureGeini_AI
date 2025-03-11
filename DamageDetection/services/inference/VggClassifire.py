@@ -5,13 +5,26 @@ import numpy as np
 
 class VggClassifire(BaseModel):
 
+    _instance = None
     model = None
     results = None
     class_names = ['minor', 'moderate', 'severe']
 
-    def load_model(self, path):
-        self.model = load_model(path)
-        print("VGG16 classifier loaded")
+    def __new__(cls,path):
+        if cls._instance is None:
+            cls._instance = super(VggClassifire, cls).__new__(cls)
+            cls._instance.model_path = path
+            cls._instance.model = None
+
+        return cls._instance
+
+    def load_model(self):
+        if self.model is None:
+            print(f"Loading VGG16 model from {self.model_path}...")
+            self.model = load_model(self.model_path)
+
+        # self.model = load_model(path)
+        # print("VGG16 classifier loaded")
 
     def predict(self, image):
         if self.model is None:

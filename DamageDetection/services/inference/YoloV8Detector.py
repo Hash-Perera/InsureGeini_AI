@@ -4,12 +4,23 @@ import numpy as np
 
 class YoloV8Detector(BaseModel):
 
+    _instance = None
     model = None
     results = None
 
-    def load_model(self, path):
-        self.model = YOLO(path)
-        print("Detector Model Loaded")
+    def __new__(cls,path):
+        if cls._instance is None:
+            cls._instance = super(YoloV8Detector, cls).__new__(cls)
+            cls._instance.model_path = path
+            cls._instance.model = None
+
+        return cls._instance
+
+    def load_model(self):
+        if self.model is None:
+            print(f"Loading YOLOv8 model from {self.model_path}...")
+            self.model = YOLO(self.model_path)
+
 
 #Remaining filter out and return only the required, search what is only needed.
     def predict(self, image):
