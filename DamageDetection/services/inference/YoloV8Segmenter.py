@@ -3,12 +3,23 @@ from ultralytics import YOLO
 
 class YoloV8Segmenter(BaseModel):
 
+    _instance = None
     model = None
     results = None
 
-    def load_model(self, path):
-        self.model = YOLO(path)
-        print("Segmenter Model Loaded")
+    def __new__(cls,path):
+        if cls._instance is None:
+            cls._instance = super(YoloV8Segmenter, cls).__new__(cls)
+            cls._instance.model_path = path
+            cls._instance.model = None
+
+        return cls._instance
+
+    def load_model(self):
+        if self.model is None:
+            print(f"Loading YOLOv8 model from {self.model_path}...")
+            self.model = YOLO(self.model_path)
+        
 
     def predict(self, image):
         self.results = self.model(image)

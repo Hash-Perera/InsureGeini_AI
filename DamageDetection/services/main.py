@@ -1,22 +1,27 @@
 from inference.YoloV8Detector import YoloV8Detector
 from inference.YoloV8Segmenter import YoloV8Segmenter
 from inference.VggClassifire import VggClassifire
+from inference.ModelFactory import ModelFactory
 from utils.PreProcess import PreProcess
 from utils.PostProcess import PostProcess
 from AiPipeline import AiPipeline
 
 #instantiate models
-detector = YoloV8Detector()
-segmenter = YoloV8Segmenter()
-classifire = VggClassifire()
+# detector = YoloV8Detector()
+# segmenter = YoloV8Segmenter()
+# classifire = VggClassifire()
 
 
 #loading models
-detector.load_model('../AI_Modles/YoloV8Detection.pt')
+# detector.load_model('../AI_Modles/YoloV8Detection.pt')
 
-segmenter.load_model('../AI_Modles/YoloV8Segmentation.pt')
+# segmenter.load_model('../AI_Modles/YoloV8Segmentation.pt')
 
-classifire.load_model('../AI_Modles/Vgg16Classification.h5')
+# classifire.load_model('../AI_Modles/Vgg16Classification.h5')
+
+detector = ModelFactory.create_model("YoloV8Detector", "../AI_Modles/YoloV8Detection.pt")
+segmenter = ModelFactory.create_model("YoloV8Segmenter", "../AI_Modles/YoloV8Segmentation.pt")
+classifire = ModelFactory.create_model("VggClassifire", "../AI_Modles/Vgg16Classification.h5")
 
 
 #instsantiate pipeline components
