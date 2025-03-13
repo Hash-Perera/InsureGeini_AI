@@ -32,7 +32,7 @@ async def verify_connection():
 # Function to insert a document
 async def insert_to_fraud_collection(result, claim_id):
     fraud_record = {
-        "claim_id": ObjectId(claim_id),
+        "claim": ObjectId(claim_id),
         "model_result": result.get("model_result", {}),
         "face_result": result.get("face_result", {}),
         "read_licence_result": result.get("read_licence_result", {}),
