@@ -1,5 +1,6 @@
 #Add the preprocessing code
 #Search what preprocessings are need
+import io
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
@@ -12,7 +13,13 @@ class PreProcess:
 
         #Pre processing for VGG16 classification
         IMG_SIZE = (224, 224)
-        img = load_img(image, target_size=IMG_SIZE)
+
+        # ✅ Convert PIL Image to `io.BytesIO` before passing to `load_img`
+        image_bytes = io.BytesIO()
+        image.save(image_bytes, format="JPEG")  # ✅ Save image in memory as bytes
+        image_bytes.seek(0)  # ✅ Move cursor to the beginning of the file
+
+        img = load_img(image_bytes, target_size=IMG_SIZE)
         img_array = img_to_array(img) / 255.0  # Normalize
         img_array = np.expand_dims(img_array, axis=0)  # Add batch dimension
 
@@ -28,8 +35,11 @@ class PreProcess:
 
         
         # Load the original image
-        image = cv2.imread(image_path)
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert for correct display
+        # image = cv2.imread(image_path)
+        # ✅ Convert PIL image to OpenCV format (NumPy array)
+        image = np.array(image_path)  # ✅ Convert to NumPy array
+        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)  # ✅ Convert RGB to BGR (OpenCV format)
+        # image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)  # Convert for correct display
         original_height, original_width = image.shape[:2]
 
         cropped_data = []  # Store preprocessed images

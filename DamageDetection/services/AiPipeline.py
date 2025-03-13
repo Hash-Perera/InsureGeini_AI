@@ -72,21 +72,23 @@ class AiPipeline:
         #To be changed to add the internal damages properly
         unified_vector = self.postprocessor.create_unified_vector(final_result)
 
+        # print(unified_vector)
+
         
         claim = estimate_claim(unified_vector)
 
-        print("Claim estimate : ",claim)
+        # print("Claim estimate : ",claim)
 
         #To be removed
 
         # Convert list values in 'damageType' column to comma-separated strings
-        for entry in unified_vector:
-            entry['damageType'] = ', '.join(entry['damageType'])
+        # for entry in unified_vector:
+        #     entry['damageType'] = ', '.join(entry['damageType'])
 
-        # Create a tabulated format for display
-        table = tabulate(final_result, headers="keys", tablefmt="grid")
+        # # Create a tabulated format for display
+        # table = tabulate(final_result, headers="keys", tablefmt="grid")
 
-        # Print the formatted table
-        print(table)
+        # # Print the formatted table
+        # print(table)
 
         return unified_vector
