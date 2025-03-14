@@ -1,104 +1,233 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Vehicle Damage Report</title>
-    <style>
-        body { font-family: Arial, sans-serif; margin: 40px; }
-        h1, h2 { color: #2E86C1; }
-        .section { margin-bottom: 20px; }
-        .data { margin-left: 20px; }
-        .signature { margin-top: 40px; }
-        .footer { margin-top: 50px; font-size: 12px; text-align: center; color: #666; }
-        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        img { max-width: 300px; height: auto; display: block; margin: 10px 0; }
-    </style>
-</head>
-<body>
+    <link rel="stylesheet" href="./report.css" />
+    <style></style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="./logo.jpeg" alt="Company Logo" />
+      </div>
+      <div class="contact-info">
+        <p><strong>InsureGeni</strong></p>
+        <p>1234 Main Street, City, State, 56789</p>
+        <p>Phone: (123) 456-7890</p>
+        <p>Email: info@insurancecompany.com</p>
+      </div>
+    </header>
+    <div class="report-title">
+      <h1>Vehicle Damage Report</h1>
+    </div>
+    <div class="basic-container">
+      <div class="basic-container-inside">
+        <span class="basic-span"
+          >NTJ 455 / 3 May 2023 / 7HGSA1DFGT14554 / 2015</span
+        >
+        <span class="basic-span">Toyota Prius / Ian Lee</span>
+      </div>
+      <span class="basic-status">complete</span>
+    </div>
 
-    <h1>Vehicle Damage Report</h1>
+    <div class="report-header">
+      <div class="header-item">Score</div>
+      <div class="header-item">Flagged items</div>
+      <div class="header-item">Actions</div>
+    </div>
+
+    <div class="report-details">
+      <div class="detail-row">
+        <div class="label">Vehicle Registration Number</div>
+
+        <div class="value">NTJ 455</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Identification Number</div>
+        <div class="value">7HGSA1DFGT14554</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Year, Make & Model</div>
+        <div class="value">2015 Toyota Prius</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Report conducted on (Date and Time)</div>
+        <div class="value">03.05.2023 11:17 PST</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Fleet Manager's Full Name</div>
+        <div class="value">Ian Lee</div>
+      </div>
+    </div>
+
+    <div class="report-header">
+      <div class="header-item">Audit</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">General Information</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Driver's Name</div>
+      <div class="value">John smith</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Driver's License img</div>
+      <div class="value">Image</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Phone Number</div>
+      <div class="value">+94 71 2837139</div>
+    </div>
+
+    <div class="detail-row-title">
+      <div class="label-title">Damage Details</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Date and time of the incident</div>
+      <div class="value">01.05.2023 14:19 PST</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Location of the incident</div>
+      <div class="value">
+        Royal Festival Hall, 337-338 Belvedere Rd, London SE1 8XU, UK
+        (51.5057343, -0.1166231)
+      </div>
+    </div>
+    <div class="detail-row-status">
+      <div class="label-status">Whether condition</div>
+      <div class="value-status">fine</div>
+    </div>
+    <div class="detail-row-status">
+      <div class="label-status">What cause the damage ?</div>
+      <div class="value-status-red">Collision</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Damage Parts</div>
+    </div>
+    <div class="detail-row-status">
+      <div class="label-status">Side Bumber</div>
+      <div class="value2">Estimated Cost: $200</div>
+      <div class="value-status-red">Moderate</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Description of the incident</div>
+    </div>
+    <div class="value2">
+      John called me up, advised that the car he was driving for two girls have
+      been involved in an accident while on his way to The National Poetry
+      Library. John’s front and side of the car was hit by a Land Rover driven
+      by Sarah. As per John and his witnesses, Sarah came from the other lane
+      going the opposite direction. Sarah lost control and occupied John’s lane.
+      The damage to our Toyota Prius is just terrible; this can’t be used for
+      our business anymore unless parts have been replaced and the body paint
+      re-done. The hood is badly bent; the whole engine almost exposed. The
+      bumper is dangling, the grill crushed, headlights broken.
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Take photo evidence of vehicle damage</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Summary of the incident</div>
+    </div>
+    <div class="value2">
+      John called me up, advised that the car he was driving for two girls have
+      been involved in an accident while on his way to The National Poetry
+      Library. John’s front and side of the car was hit by a Land Rover driven
+      by Sarah. As per John and his witnesses, Sarah came from the other lane
+      going the opposite direction. Sarah lost control and occupied John’s lane.
+      The damage to our Toyota Prius is just terrible; this can’t be used for
+      our business anymore unless parts have been replaced and the body paint
+      re-done. The hood is badly bent; the whole engine almost exposed. The
+      bumper is dangling, the grill crushed, headlights broken.
+    </div>
+
     <p><strong>Vehicle Registration:</strong> {{ vehicle_reg }}</p>
     <p><strong>VIN:</strong> {{ vin }}</p>
     <p><strong>Make & Model:</strong> {{ make_model }}</p>
     <p><strong>Report Date:</strong> {{ report_date }}</p>
     <p><strong>Fleet Manager:</strong> {{ fleet_manager }}</p>
 
-    <hr>
+    <hr />
 
     <div class="section">
-        <h2>1. Audit</h2>
+      <h2>1. Audit</h2>
 
-        <h3>1.1 General Information</h3>
-        <p><strong>Driver:</strong> {{ driver_name }}</p>
-        <p><strong>Phone:</strong> {{ driver_phone }}</p>
+      <h3>1.1 General Information</h3>
+      <p><strong>Driver:</strong> {{ driver_name }}</p>
+      <p><strong>Phone:</strong> {{ driver_phone }}</p>
 
-        <h3>1.2 Damage Details</h3>
-        <p><strong>Date & Time of Incident:</strong> {{ incident_date }}</p>
-        <!-- <p><strong>Location:</strong> {{ location }}</p> -->
-        <p><strong>Location:</strong> {{ location.address }} (Lat: {{ location.coordinates.latitude }}, Lon: {{ location.coordinates.longitude }})</p>
-        <p><strong>Weather Condition:</strong> {{ weather }}</p>
-        <p><strong>Degree of Damage:</strong> {{ damage_severity }}</p>
-        <p><strong>Cause of Damage:</strong> {{ damage_cause }}</p>
+      <h3>1.2 Damage Details</h3>
+      <p><strong>Date & Time of Incident:</strong> {{ incident_date }}</p>
+      <!-- <p><strong>Location:</strong> {{ location }}</p> -->
+      <p>
+        <strong>Location:</strong> {{ location.address }} (Lat: {{
+        location.coordinates.latitude }}, Lon: {{ location.coordinates.longitude
+        }})
+      </p>
+      <p><strong>Weather Condition:</strong> {{ weather }}</p>
+      <p><strong>Degree of Damage:</strong> {{ damage_severity }}</p>
+      <p><strong>Cause of Damage:</strong> {{ damage_cause }}</p>
 
-        <h4>Description:</h4>
-        <p>{{ incident_description }}</p>
+      <h4>Description:</h4>
+      <p>{{ incident_description }}</p>
     </div>
 
     <div class="section">
-        <h3>1.2.1 Other Party Involved</h3>
-        {% if other_party %}
-        <table>
-            <tr>
-                <th>Driver</th>
-                <th>Vehicle</th>
-                <th>Registration</th>
-                <th>VIN</th>
-            </tr>
-            <tr>
-                <td>{{ other_party.name }}</td>
-                <td>{{ other_party.vehicle.make_model }}</td>
-                <td>{{ other_party.vehicle.registration }}</td>
-                <td>{{ other_party.vehicle.vin }}</td>
-            </tr>
-        </table>
-        {% else %}
-        <p>No other party involved.</p>
-        {% endif %}
-    </div>
-    
-
-    <div class="section">
-        <h3>1.3 Witnesses</h3>
-        {% for witness in witnesses %}
-        <p><strong>{{ witness.name }}</strong> ({{ witness.date }})</p>
-        <p>{{ witness.statement }}</p>
-        {% endfor %}
+      <h3>1.2.1 Other Party Involved</h3>
+      {% if other_party %}
+      <table>
+        <tr>
+          <th>Driver</th>
+          <th>Vehicle</th>
+          <th>Registration</th>
+          <th>VIN</th>
+        </tr>
+        <tr>
+          <td>{{ other_party.name }}</td>
+          <td>{{ other_party.vehicle.make_model }}</td>
+          <td>{{ other_party.vehicle.registration }}</td>
+          <td>{{ other_party.vehicle.vin }}</td>
+        </tr>
+      </table>
+      {% else %}
+      <p>No other party involved.</p>
+      {% endif %}
     </div>
 
     <div class="section">
-        <h3>1.4 Summary</h3>
-        <p>{{ summary }}</p>
+      <h3>1.3 Witnesses</h3>
+      {% for witness in witnesses %}
+      <p><strong>{{ witness.name }}</strong> ({{ witness.date }})</p>
+      <p>{{ witness.statement }}</p>
+      {% endfor %}
     </div>
 
     <div class="section">
-        <h3>1.5 Acknowledgment</h3>
-        <p><strong>Driver:</strong> {{ driver_signature }} ({{ driver_date }})</p>
-        <p><strong>Fleet Manager:</strong> {{ fleet_manager_signature }} ({{ fleet_manager_date }})</p>
+      <h3>1.4 Summary</h3>
+      <p>{{ summary }}</p>
     </div>
 
     <div class="section">
-        <h2>2. Media Summary</h2>
-        <p>Photo Evidence:</p>
-        {% for photo in photos %}
-            <img src="file://{{ photo }}" alt="Damage Photo">
-        {% endfor %}
+      <h3>1.5 Acknowledgment</h3>
+      <p><strong>Driver:</strong> {{ driver_signature }} ({{ driver_date }})</p>
+      <p>
+        <strong>Fleet Manager:</strong> {{ fleet_manager_signature }} ({{
+        fleet_manager_date }})
+      </p>
+    </div>
+
+    <div class="section">
+      <h2>2. Media Summary</h2>
+      <p>Photo Evidence:</p>
+      {% for photo in photos %}
+      <img src="file://{{ photo }}" alt="Damage Photo" />
+      {% endfor %}
     </div>
 
     <div class="footer">
-        Private & Confidential | Report Generated by Insurance System
+      Private & Confidential | Report Generated by Insurance System
     </div>
-
-</body>
+  </body>
 </html>
