@@ -4,7 +4,7 @@ from database import claim_collection, verify_connection
 from bson import ObjectId
 from services.s_damage_compare import damage_compare
 from services.s_driving_licence import face_compare
-from services.aws import download_file_from_url
+from services.aws.aws_download import download_file_from_url
 import time
 from dotenv import load_dotenv
 from openai import OpenAI 
@@ -14,7 +14,7 @@ import os
 load_dotenv()
 
 async def excute_fraud_detector(claimId):
-    # print(claimId);
+   
     try:
         # Find the claim in the database
         if not ObjectId.is_valid(claimId):
@@ -28,19 +28,12 @@ async def excute_fraud_detector(claimId):
         claim = convert_bson_to_json(claim)
 
 
-        license_path = download_file_from_url(claim["drivingLicenseFront"])
-        driver_path = download_file_from_url(claim["driverFace"])
-        url_set_1 = claim["damageImages"]
-
-        url_set_2 = [
-            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
-            'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
-        ]
-
 
         try:
+            license_path = download_file_from_url(claim["drivingLicenseFront"])
+            driver_path = download_file_from_url(claim["driverFace"])
             #! Detect Face Logic
-            faceResult = face_compare(license_path, driver_path)
+            faceResult = await face_compare(license_path, driver_path, claim["drivingLicenseFront"] , claim["driverFace"])
         except Exception as e:
             faceResult = {
                 "status": False, 
@@ -50,8 +43,61 @@ async def excute_fraud_detector(claimId):
             }
         
         try:
+
+            #######################################################################################
+
+            # Ensure vehicleId is an ObjectId before querying
+            vehicle_id = claim["vehicleId"]
+            if isinstance(vehicle_id, dict) and "$oid" in vehicle_id:
+                vehicle_id = ObjectId(vehicle_id["$oid"])
+            elif isinstance(vehicle_id, str):
+                vehicle_id = ObjectId(vehicle_id)
+
+            # Ensure claimId is an ObjectId before excluding it
+            current_claim_id = claim["_id"]
+            if isinstance(current_claim_id, dict) and "$oid" in current_claim_id:
+                current_claim_id = ObjectId(current_claim_id["$oid"])
+            elif isinstance(current_claim_id, str):
+                current_claim_id = ObjectId(current_claim_id)
+
+            # Find the claims that have damage Areas in the current claim
+            current_damage_areas = claim["damagedAreas"] or []
+            query = {
+                "damagedAreas": {
+                    "$in": current_damage_areas  
+                },
+                "vehicleId" : vehicle_id,
+                "_id": { "$ne": current_claim_id }
+            }
+
+            
+            # Fetch claims with similar damage areas and same vehicleId
+            similar_claims = await claim_collection.find(query, {"_id": 1, "damagedAreas": 1, "damageImages": 1}).to_list(length=None)
+            # Convert BSON ObjectIds to JSON format
+            # similar_claims_formatted = []
+            # if len(similar_claims) > 0: 
+            #     similar_claims_formatted = [convert_bson_to_json(claim) for claim in similar_claims]
+
+            
+        
+            
+            # Push Damage images of all similar claims to a new array
+            similar_damage_images = []
+            for claim in similar_claims:
+                similar_damage_images.extend(claim["damageImages"])
+
+            # Pass Similer images list to compare images function
+            ###########################################################################################
+
             #! compare images
+            url_set_1 = claim["damageImages"]
+
+            url_set_2 = [
+                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+            ]
             similarity_score = damage_compare(url_set_1, url_set_2)
+
         except Exception as e:
             similarity_score =   {
                 "status": False,
@@ -111,6 +157,7 @@ async def excute_fraud_detector(claimId):
 
         #! Read Color
         try:
+           
             colorResult = exraction_color(claim["vehicleFront"])
         except Exception as e:
             colorResult = {
@@ -551,16 +598,84 @@ def exraction_vin_number(image_url):
             "vin_number": 'N/A'
         }
 
+
+
 def exraction_color(image_url):
     try:
-        print(image_url)
+
+        # Create assistant once (outside function)
+        assistant = client.beta.assistants.create(
+        name="Vehicle color",
+        instructions="You are an OCR expert. Detect the vehicle color. No explanations. Response format is [Red, Blue, Black, White, Silver, Grey, Green, Yellow, Orange, Brown]",
+        model="gpt-4o",
+        tools=[{"type": "code_interpreter"}]
+        )
+
+        # Create thread
+        thread = client.beta.threads.create()
+
+        # Add message with image
+        message = client.beta.threads.messages.create(
+            thread_id=thread.id,
+            role="user",
+            content=[
+                {"type": "text", "text": "Find the color of the vehicle in the image"},
+                {"type": "image_url", "image_url": {"url": image_url}}
+            ]
+        )
+
+        # Run assistant
+        run = client.beta.threads.runs.create(
+            thread_id=thread.id,
+            assistant_id=assistant.id
+        )
+
+        # Wait for completion with a timeout mechanism
+        MAX_RETRIES = 30
+        retry_count = 0
+
+        while run.status not in ["completed", "failed", "cancelled"]:
+            if retry_count >= MAX_RETRIES:
+                return {
+                    "status": False, 
+                    "error": "The color extraction process took too long.", 
+                    "color": 'N/A'
+                }
+
+            time.sleep(2)
+            run = client.beta.threads.runs.retrieve(
+                thread_id=thread.id,
+                run_id=run.id
+            )
+            retry_count += 1
+
+        if run.status == "failed":
+            return {
+                "status": False, 
+                "error": "The color extraction process failed.", 
+                "color": 'N/A'
+            }
+
+        # Get response
+        messages = client.beta.threads.messages.list(thread_id=thread.id)
+
+        # Ensure we have valid message content
+        extracted_text = "N/A"
+        if messages.data and messages.data[0].content:
+            extracted_text = messages.data[0].content[0].text.value  # Fix: Access .text directly
+
+        print(messages.data[0].content)
+
+        return {
+            "status": True, 
+            "error": None,  # Fix: Error should be None if success
+            "color": extracted_text
+        }
+
     except Exception as e:
         return {
             "status": False, 
-            "error": e, 
+            "error": str(e),  # Fix: Convert exception to string for readability
             "color": 'N/A'
         }
     
-
-
- 

@@ -15,7 +15,7 @@ from services.s_vehicle_model_detection import predict_vehicle_class
 
 from database import claim_collection, verify_connection
 from bson import ObjectId
-from services.aws import download_file_from_url
+from services.aws.aws_download import download_file_from_url
 
 from services.queue_service import start_fraud_consumer
 

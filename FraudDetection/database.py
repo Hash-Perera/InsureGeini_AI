@@ -47,3 +47,11 @@ async def insert_to_fraud_collection(result, claim_id):
     print(f"Document inserted with ID: {result.inserted_id}")
     return result.inserted_id;
 
+# Update the claim status
+async def update_claim_status(claim_id):
+    result = await claim_collection.update_one(
+        {"_id": ObjectId(claim_id)},
+        {"$set": {"status": 'Fraud Detected'}}
+    )
+    print(f"Claim status updated: {result.modified_count}")
+

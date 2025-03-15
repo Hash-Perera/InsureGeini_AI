@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 import os
 from services.z_detector import excute_fraud_detector
-from database import insert_to_fraud_collection
+from database import insert_to_fraud_collection, update_claim_status
 
 load_dotenv()
 
@@ -28,6 +28,9 @@ async def consume_and_forward():
 
                 result = await excute_fraud_detector(claimId);
                 new_fraud_record = await insert_to_fraud_collection(result, claimId)
+                # Update claim status in the database
+                await update_claim_status(claimId)
+
                 print(f"📝 Inserted to fraud collection: {new_fraud_record}")
 
                 exchange = await channel.get_exchange("insure_geini_exchange")
