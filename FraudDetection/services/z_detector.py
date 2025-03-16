@@ -19,14 +19,13 @@ async def excute_fraud_detector(claimId):
         # Find the claim in the database
         if not ObjectId.is_valid(claimId):
             raise HTTPException(status_code=400, detail="Invalid claim ID format")
-        claim = await claim_collection.find_one({"_id": ObjectId(claimId)})
+        claimMongo = await claim_collection.find_one({"_id": ObjectId(claimId)})
         
-        if not claim:
+        if not claimMongo:
             raise HTTPException(status_code=404, detail="Claim not found")
         
         # Convert BSON to Json
-        claim = convert_bson_to_json(claim)
-
+        claim =  convert_bson_to_json(claimMongo)
 
 
         try:
@@ -40,69 +39,6 @@ async def excute_fraud_detector(claimId):
                 "error": str(e), 
                 "verified": None, 
                 "model_results": None
-            }
-        
-        try:
-
-            #######################################################################################
-
-            # Ensure vehicleId is an ObjectId before querying
-            vehicle_id = claim["vehicleId"]
-            if isinstance(vehicle_id, dict) and "$oid" in vehicle_id:
-                vehicle_id = ObjectId(vehicle_id["$oid"])
-            elif isinstance(vehicle_id, str):
-                vehicle_id = ObjectId(vehicle_id)
-
-            # Ensure claimId is an ObjectId before excluding it
-            current_claim_id = claim["_id"]
-            if isinstance(current_claim_id, dict) and "$oid" in current_claim_id:
-                current_claim_id = ObjectId(current_claim_id["$oid"])
-            elif isinstance(current_claim_id, str):
-                current_claim_id = ObjectId(current_claim_id)
-
-            # Find the claims that have damage Areas in the current claim
-            current_damage_areas = claim["damagedAreas"] or []
-            query = {
-                "damagedAreas": {
-                    "$in": current_damage_areas  
-                },
-                "vehicleId" : vehicle_id,
-                "_id": { "$ne": current_claim_id }
-            }
-
-            
-            # Fetch claims with similar damage areas and same vehicleId
-            similar_claims = await claim_collection.find(query, {"_id": 1, "damagedAreas": 1, "damageImages": 1}).to_list(length=None)
-            # Convert BSON ObjectIds to JSON format
-            # similar_claims_formatted = []
-            # if len(similar_claims) > 0: 
-            #     similar_claims_formatted = [convert_bson_to_json(claim) for claim in similar_claims]
-
-            
-        
-            
-            # Push Damage images of all similar claims to a new array
-            similar_damage_images = []
-            for claim in similar_claims:
-                similar_damage_images.extend(claim["damageImages"])
-
-            # Pass Similer images list to compare images function
-            ###########################################################################################
-
-            #! compare images
-            url_set_1 = claim["damageImages"]
-
-            url_set_2 = [
-                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
-                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
-            ]
-            similarity_score = damage_compare(url_set_1, url_set_2)
-
-        except Exception as e:
-            similarity_score =   {
-                "status": False,
-                "error": str(e),
-                "results": None
             }
 
         try:
@@ -157,13 +93,77 @@ async def excute_fraud_detector(claimId):
 
         #! Read Color
         try:
-           
             colorResult = exraction_color(claim["vehicleFront"])
         except Exception as e:
             colorResult = {
                 "status": False, 
                 "error": str(e), 
                 "color": 'N/A'
+            }
+
+
+        #! Compare Damage Images
+        try:
+
+            # #######################################################################################
+
+            # # Ensure vehicleId is an ObjectId before querying
+            # vehicle_id = claim["vehicleId"]
+            # if isinstance(vehicle_id, dict) and "$oid" in vehicle_id:
+            #     vehicle_id = ObjectId(vehicle_id["$oid"])
+            # elif isinstance(vehicle_id, str):
+            #     vehicle_id = ObjectId(vehicle_id)
+
+            # # Ensure claimId is an ObjectId before excluding it
+            # current_claim_id = claim["_id"]
+            # if isinstance(current_claim_id, dict) and "$oid" in current_claim_id:
+            #     current_claim_id = ObjectId(current_claim_id["$oid"])
+            # elif isinstance(current_claim_id, str):
+            #     current_claim_id = ObjectId(current_claim_id)
+
+            # # Find the claims that have damage Areas in the current claim
+            # current_damage_areas = claim["damagedAreas"] or []
+            # query = {
+            #     "damagedAreas": {
+            #         "$in": current_damage_areas  
+            #     },
+            #     "vehicleId" : vehicle_id,
+            #     "_id": { "$ne": current_claim_id }
+            # }
+
+            
+            # # Fetch claims with similar damage areas and same vehicleId
+            # similar_claims = await claim_collection.find(query, {"_id": 1, "damagedAreas": 1, "damageImages": 1}).to_list(length=None)
+            # # Convert BSON ObjectIds to JSON format
+            # # similar_claims_formatted = []
+            # # if len(similar_claims) > 0: 
+            # #     similar_claims_formatted = [convert_bson_to_json(claim) for claim in similar_claims]
+
+            
+        
+            
+            # # Push Damage images of all similar claims to a new array
+            # similar_damage_images = []
+            # for claim in similar_claims:
+            #     similar_damage_images.extend(claim["damageImages"])
+
+            # # Pass Similer images list to compare images function
+            # ###########################################################################################
+
+            #! compare images
+            url_set_1 = claim["damageImages"]
+
+            url_set_2 = [
+                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+            ]
+            similarity_score = damage_compare(url_set_1, url_set_2)
+
+        except Exception as e:
+            similarity_score =   {
+                "status": False,
+                "error": str(e),
+                "results": None
             }
 
 
@@ -269,7 +269,7 @@ def identify_car_model(image_url):
     except Exception as e:  
         return {
             "status": False, 
-            "error": e, 
+            "error":  str(e), 
             "model": 'N/A'
         }
 
@@ -355,7 +355,7 @@ def extract_insurance_card_text(image_url):
     except Exception as e:
         return {
             "status": False, 
-            "error": e, 
+            "error":  str(e), 
             "insurace_Details": 'N/A'
         }
 
@@ -442,7 +442,7 @@ def extract_driving_license_text(image_url):
     except Exception as e:
         return {
             "status": False, 
-            "error": e, 
+            "error":  str(e), 
             "licence_Details": 'N/A'
         }
     
@@ -510,7 +510,7 @@ def extract_number_plates(image_url):
 
         return {
             "status": True, 
-            "error": e, 
+            "error":  str(e), 
             "number_plate": extracted_text
         }
 
@@ -518,7 +518,7 @@ def extract_number_plates(image_url):
     except Exception as e:
         return {
             "status": False, 
-            "error": e, 
+            "error":  str(e), 
             "number_plate": 'N/A'
         }
 
@@ -586,7 +586,7 @@ def exraction_vin_number(image_url):
 
         return {
             "status": True, 
-            "error": e, 
+            "error":  str(e), 
             "vin_number": extracted_text
         }
 
@@ -594,7 +594,7 @@ def exraction_vin_number(image_url):
     except Exception as e:
         return {
             "status": False, 
-            "error": e, 
+            "error":  str(e), 
             "vin_number": 'N/A'
         }
 
