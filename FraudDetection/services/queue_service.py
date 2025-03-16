@@ -57,7 +57,7 @@ import json
 from dotenv import load_dotenv
 import os
 from services.z_detector import excute_fraud_detector
-from database import insert_to_fraud_collection, update_claim_status
+from database import insert_to_fraud_collection, update_claim_status_end, update_claim_status_start
 
 load_dotenv()
 
@@ -83,6 +83,9 @@ async def consume_and_forward():
                             print("⚠️ Missing claimId in message. Skipping.")
                             continue
 
+                        # Update the claim status to 'Fraud Detection Started'
+                        await update_claim_status_start(claimId)
+
                         result = await excute_fraud_detector(claimId)
                         
                         if not result:
@@ -92,7 +95,7 @@ async def consume_and_forward():
                         new_fraud_record = await insert_to_fraud_collection(result, claimId)
                         
                         # Update claim status in the database
-                        await update_claim_status(claimId)
+                        await update_claim_status_end(claimId)
 
                         print(f"📝 Inserted to fraud collection: {new_fraud_record}")
 
