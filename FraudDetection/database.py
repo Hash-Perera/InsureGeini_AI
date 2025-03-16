@@ -32,7 +32,7 @@ async def verify_connection():
 # Function to insert a document
 async def insert_to_fraud_collection(result, claim_id):
     fraud_record = {
-        "claim_id": ObjectId(claim_id),
+        "claim": ObjectId(claim_id),
         "model_result": result.get("model_result", {}),
         "face_result": result.get("face_result", {}),
         "read_licence_result": result.get("read_licence_result", {}),
@@ -46,4 +46,19 @@ async def insert_to_fraud_collection(result, claim_id):
     result = await fraud_collection.insert_one(fraud_record)
     print(f"Document inserted with ID: {result.inserted_id}")
     return result.inserted_id;
+
+# Update the claim status
+async def update_claim_status_start(claim_id):
+    result = await claim_collection.update_one(
+        {"_id": ObjectId(claim_id)},
+        {"$set": {"status": 'Fraud Detection Started'}}
+    )
+    print(f"Claim status updated: {result.modified_count}")
+# Update the claim status
+async def update_claim_status_end(claim_id):
+    result = await claim_collection.update_one(
+        {"_id": ObjectId(claim_id)},
+        {"$set": {"status": 'Fraud Detection Completed'}}
+    )
+    print(f"Claim status updated: {result.modified_count}")
 

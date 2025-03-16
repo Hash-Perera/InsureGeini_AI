@@ -4,12 +4,23 @@ import easyocr
 import matplotlib.pyplot as plt
 from deepface import DeepFace
 from mtcnn import MTCNN
+import re
+import io
+from fastapi import UploadFile
+from services.aws.s3_upload import upload_single_file 
 
-def face_compare(license_img_path, driver_img_path):
+async def face_compare(license_img_path, driver_img_path, license_original_url, driver_original_url):
     try:
         # Load images
         license_img = cv2.imread(license_img_path)
         driver_img = cv2.imread(driver_img_path)
+
+
+        folder_path = ''
+        match = re.search(r"https://.+?amazonaws\.com/(.+)/[^/]+$", license_original_url)
+        if match:
+            folder_path = match.group(1)  
+
 
         if license_img is None:
             return {"status": False, "error": "License image could not be loaded.", "verified": None, "model_results": None}
@@ -34,6 +45,22 @@ def face_compare(license_img_path, driver_img_path):
         cropped_face = license_img_rgb[y:y + height, x:x + width]
         cropped_face_bgr = cv2.cvtColor(cropped_face, cv2.COLOR_RGB2BGR)
 
+        #######################
+        # Save the cropped face to a temporary file
+        cropped_face_path = "temp/cropped_face.jpg"
+        cv2.imwrite(cropped_face_path, cropped_face_bgr)
+
+        # Open the saved image file and read it as bytes
+        with open(cropped_face_path, "rb") as file:
+            image_bytes = io.BytesIO(file.read())
+
+        # Create an UploadFile object
+        cropped_face_file = UploadFile(filename="cropped_face_licence.jpg", file=image_bytes)
+
+        # Upload to S3
+        cropped_face_s3url = await upload_single_file(cropped_face_file, folder_path)
+        #########################
+
         # Perform face comparison using DeepFace
         models = ['VGG-Face', 'Facenet', 'OpenFace', 'DeepID', 'ArcFace']
         ensemble_results = []
@@ -45,13 +72,17 @@ def face_compare(license_img_path, driver_img_path):
         # Majority voting for verification
         verified = sum(res['result'] for res in ensemble_results) > len(ensemble_results) / 2
 
-        # visualize_results(license_img_path, driver_img_path, {"verified": verified, "model_results": ensemble_results})
 
         # Return structured result
         return {
             "status": True,
             "error": None,
             "verified": verified,
+            "images" : {
+                "license": license_original_url,
+                "driver": driver_original_url,
+                "cropped_face": cropped_face_s3url
+            },
             "model_results": ensemble_results
         }
 
