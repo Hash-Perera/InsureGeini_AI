@@ -19,6 +19,7 @@ database = client.InsureGeini
 # Access the collection
 claim_collection = database.get_collection("claims")
 fraud_collection = database.get_collection("frauds")
+detection_collection = database.get_collection("detections")
 
 # Function to verify connection
 async def verify_connection():
@@ -54,6 +55,7 @@ async def update_claim_status_start(claim_id):
         {"$set": {"status": 'Fraud Detection Started'}}
     )
     print(f"Claim status updated: {result.modified_count}")
+
 # Update the claim status
 async def update_claim_status_end(claim_id):
     result = await claim_collection.update_one(
@@ -62,3 +64,38 @@ async def update_claim_status_end(claim_id):
     )
     print(f"Claim status updated: {result.modified_count}")
 
+
+#? Get detections for current claim
+async def get_detections_images_current_claim(claim_id):
+    detections = detection_collection.find({"claimId": ObjectId(claim_id)})  
+    image_urls = [doc["image_url"] for doc in await detections.to_list(length=None)]
+    return image_urls
+
+
+
+#? Get claim ids with similar damage areas
+async def get_similar_claims(claim_id, vehicle_id, damaged_areas):
+    query = {
+        "damagedAreas": {
+            "$in": damaged_areas  
+        },
+        "vehicleId" : ObjectId(vehicle_id),
+        "_id": { "$ne": ObjectId(claim_id) }
+    }
+    similar_claims = await claim_collection.find(query, {"_id": 1}).to_list(length=None)
+    return [str(claim["_id"]) for claim in similar_claims]
+
+
+
+#? Get detections for similar claims
+async def get_detections_images_similar_claims(similar_claims):
+    
+    object_id_list = [
+        claim_id if isinstance(claim_id, ObjectId) else ObjectId(claim_id) 
+        for claim_id in similar_claims
+    ]
+
+    detections = detection_collection.find({"claimId": {"$in": object_id_list}})
+    image_urls = [doc["image_url"] for doc in await detections.to_list(length=None)]
+    
+    return image_urls
