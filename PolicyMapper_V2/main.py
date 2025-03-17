@@ -2,12 +2,106 @@ from bson import ObjectId
 from fastapi import FastAPI
 from crud.claim import get_claim
 from helpers.util import download_audio_file, extract_metadata_from_audio_file_url
+import aio_pika
+import asyncio
+import json
+from dotenv import load_dotenv
+import os
+from crud.policy import create_policy
+from crud.claim import update_claim_status_start, update_claim_status_end
+from contextlib import asynccontextmanager
+from core.db import verify_connection
+load_dotenv()
+
+RABBITMQ_URL = os.getenv("RABBITMQ_URL")
+EXCHANGE_NAME = os.getenv("EXCHANGE_NAME")
+
+async def consume_and_forward():
+    try:
+        # Try connecting to RabbitMQ
+        print("🔄 Attempting to connect to RabbitMQ...")
+        connection = await aio_pika.connect_robust(RABBITMQ_URL)
+        print("✅ Successfully connected to RabbitMQ")
+        
+        async with connection:
+            channel = await connection.channel()
+            print("📡 Channel created")
+            
+            # Declare queue and print queue info
+            policy_queue = await channel.declare_queue("policy_queue", durable=True)
+            queue_info = await policy_queue.declare()
+            print(f"📊 Queue Status:")
+            print(f"   - Queue Name: {policy_queue.name}")
+            print(f"   - Message Count: {queue_info.message_count}")
+            print(f"   - Consumer Count: {queue_info.consumer_count}")
+
+            print("🎯 Starting to consume messages...")
+            async for message in policy_queue:
+                print(f"📨 Received message: {message.message_id}")
+                async with message.process():
+                    try:
+                        data = json.loads(message.body)
+                        claimId = data.get('claimId')
+
+                        print(f"🔍 Processing Policy Mapper for: {claimId}")
+
+                        if not claimId:
+                            print("⚠️ Missing claimId in message. Skipping.")
+                            continue
+
+                        # Update the claim status to 'Policy Mapper Started'
+                        await update_claim_status_start(claimId)
+
+                        result = await main(claimId)
+                        
+                        if not result:
+                            print(f"⚠️ Policy Mapper failed for claimId: {claimId}")
+                            continue
+
+                        new_policy_record = await create_policy(result, claimId)
+                        
+                        print(f"📝 Inserted to fraud collection: {new_policy_record}")
+                        
+                        # Update the claim status to 'Policy Mapper Completed'
+                        await update_claim_status_end(claimId)
+                        print("✅ Message processed successfully")
+
+                    except Exception as e:
+                        print(f"❌ Error processing message: {e}")
+                        continue  # Ensure the loop continues even if an error occurs
+
+    except aio_pika.exceptions.AMQPConnectionError as conn_err:
+        print(f"❌ Failed to connect to RabbitMQ: {conn_err}")
+        print("⚠️ Please check if RabbitMQ server is running and credentials are correct")
+    except Exception as e:
+        print(f"❌ Critical Error in consume_and_forward: {e}")
+
+async def start_policy_consumer():
+    print("🚀 Starting policy consumer...")
+    asyncio.create_task(consume_and_forward())
+    print("✅ Policy consumer started successfully")
+    
+# Lifespan event handler
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    """Handles app startup and shutdown events."""
+    # Ensure the database connection is verified
+    await verify_connection()
+    # Start fraud queue consumer in the background
+    task = asyncio.create_task(start_policy_consumer())
+    yield  # Allow FastAPI to run
+    # Cleanup if necessary (optional)
+    task.cancel()
 
 app = FastAPI(
     title="Claims Processing API",
     description="API for processing insurance claims",
     version="1.0.0",
+   # lifespan=lifespan
 )
+
+
+
 
 
 async def main(claim_id: str | ObjectId) -> dict:
