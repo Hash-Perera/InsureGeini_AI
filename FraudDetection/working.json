@@ -1,0 +1,35 @@
+{
+  "_id": {
+    "$oid": "67a1cacfeace4f9501a8c964"
+  },
+  "insuranceId": "Gsgsh",
+  "nicNo": "Gsgsg",
+  "drivingLicenseNo": "Gag",
+  "damagedAreas": ["Front", "Right Side"],
+  "location": {
+    "latitude": 6.739595,
+    "longitude": 80.094355
+  },
+  "userId": {
+    "$oid": "6748472eae0fb7cdbf7190fa"
+  },
+  "status": "Pending",
+  "insuranceFront": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656430036-insurance_front.png",
+  "insuranceBack": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656434655-insurance_back.png",
+  "nicFront": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656437681-nic_front.png",
+  "nicBack": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656440615-nic_back.png",
+  "drivingLicenseFront": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/My_L_Cropped.jpg",
+  "drivingLicenseBack": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656447145-driving_license_back.png",
+  "driverFace": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656450309-driver_face.png",
+  "frontLicencePlate": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656453504-front_licence_plate.png",
+  "backLicencePlate": "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/V_5.jpg",
+  "damageImages": [
+    "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656459403-damage_0.png",
+    "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656460610-damage_1.png",
+    "https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM_5/1738656461768-damage_2.png"
+  ],
+  "createdAt": {
+    "$date": "2025-02-04T08:07:43.107Z"
+  },
+  "__v": 0
+}
