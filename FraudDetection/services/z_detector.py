@@ -166,6 +166,16 @@ async def excute_fraud_detector(claimId):
                 "results": None
             }
 
+        try:
+            #! Verify the connection
+            verify_connection()
+        except Exception as e:
+            similarity_score =   {
+                "status": False,
+                "error": str(e),
+                "results": None
+            }    
+
 
         #? Return the results
         return {
