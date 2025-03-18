@@ -2,6 +2,7 @@ import os
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 from typing import Final
+from pymongo.errors import ServerSelectionTimeoutError
 
 load_dotenv()
 
@@ -19,3 +20,12 @@ reporttest_collection = db.get_collection("reporttests")
 role_collection = db.get_collection("roles")
 user_collection = db.get_collection("users")
 vehicle_collection = db.get_collection("vehicles")
+
+# Function to verify connection
+async def verify_connection():
+    try:
+        # Ping the MongoDB server
+        await client.admin.command("ping")
+        print("MongoDB connection successful!")
+    except ServerSelectionTimeoutError as e:
+        print("MongoDB connection failed:", str(e))
