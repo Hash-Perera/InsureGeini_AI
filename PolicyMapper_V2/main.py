@@ -170,7 +170,7 @@ async def main(claim_id: str | ObjectId) -> dict:
     print("\n")
 
     damage_detection_data = await get_damage_detection(claim_record.get("_id"))
-    incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data)
+    incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data, transcribed_text)
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data, incident_summary)
     pdf_generator = PDFGenerator()

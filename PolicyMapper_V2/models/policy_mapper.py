@@ -254,7 +254,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
     # Calculate the total approved costs
     approved_costs = sum(result['cost'] for result in detailed_results if result['evaluation']['approved'])
     #overall_status = "approved" if all(result['evaluation']['approved'] for result in detailed_results) else "rejected"
-    overall_status = "rejected" if all(not result['evaluation']['approved'] for result in detailed_results) else "approved"
+    overall_status = "Rejected" if all(not result['evaluation']['approved'] for result in detailed_results) else "Approved"
 
     return {
         "overall_status": overall_status,
