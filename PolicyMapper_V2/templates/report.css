@@ -1,6 +1,6 @@
 body {
   font-family: Arial, sans-serif;
-  margin: 40px;
+  width: 100%;
 }
 h1,
 h2 {
@@ -39,18 +39,16 @@ img {
   margin: 10px 0;
 }
 header {
-  background-color: #050505;
+  background-color: #000000;
   color: white;
-  padding: 20px 0;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-left: 20px;
-  padding-right: 20px;
+  width: 100%;
 }
 .logo img {
-  height: 50px;
   mix-blend-mode: multiply;
+  width: 120px;
 }
 .address {
   font-size: 14px;

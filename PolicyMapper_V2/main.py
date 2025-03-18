@@ -11,6 +11,13 @@ from crud.policy import create_policy
 from crud.claim import update_claim_status_start, update_claim_status_end
 from contextlib import asynccontextmanager
 from core.db import verify_connection
+from audio.util import process_audio_file
+from Models.incident_generator import analyze_accident
+from crud.user import get_user
+from crud.vehicle import get_vehicle
+from crud.damage_detection import get_damage_detection
+from document_generator.data_collector import collect_data
+from document_generator.pdf_generator import PDFGenerator
 
 load_dotenv()
 
@@ -144,6 +151,34 @@ async def main(claim_id: str | ObjectId) -> dict:
     logger.info(f"Audio file processed successfully")
         
     
+    claim_data = claim_record
+    user_data = await get_user(claim_record.get("userId"))
+    vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
+    damage_detection_data = await get_damage_detection(claim_record.get("_id"))
+    
+  
+    data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data)
+    pdf_generator = PDFGenerator()
+    pdf_generator.generate_pdf(data, "vehicle_damage_report.pdf")
+    
+    # Process the downloaded audio file
+    #try:
+       # transcribed_text = process_audio_file(audio_file_saved_path)
+        #print("Transcribed text in main function: ")
+        #print(transcribed_text)
+        
+        #analysis = analyze_accident(transcribed_text)
+        #print("Analysis in main function: ")
+        
+        #return {
+        #    "transcription": transcribed_text,
+        #    "analysis": analysis
+        #}
+    
+    #except Exception as e:
+    #    return {"error": str(e)}
+    
+ 
 
 @app.get("/", response_model=None)
 async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
