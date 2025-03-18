@@ -73,6 +73,7 @@ async def excute_fraud_detector(claimId):
 
         try:
             #! Read Number Plate
+            print(claim["frontLicencePlate"]);
             readNumberPlateResult = extract_number_plates(claim["frontLicencePlate"])
         except Exception as e:
             readNumberPlateResult = {
@@ -526,7 +527,7 @@ def extract_number_plates(image_url):
 
         return {
             "status": True, 
-            "error":  str(e), 
+            "error":  None, 
             "number_plate": extracted_text
         }
 
