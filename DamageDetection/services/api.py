@@ -36,9 +36,10 @@ def get_pipeline():
 
 @app.post("/predict")
 async def predict(request: DetectionRequest):
-    #Incude db calls to retrive the image url
-    #Most probably the object id will be sent
+
+    #Add db calls to get the obd codes from claims collection
     claim = await db.claims.find_one({"_id": ObjectId(request.claimId)},{"damageImages":1, "_id": 0})
+    obd_codes = ["B3108","B0050"]
 
     if not claim:
         raise HTTPException(status_code=404, detail="Claim not found")
@@ -61,20 +62,25 @@ async def predict(request: DetectionRequest):
 
     pipeline = get_pipeline()
     image_path = "C:/Users/user/Desktop/SLIIT/Year 4 Semester 1/Demo Images/detectionTest1.jpg"
-    result = pipeline.process_image(image)
+    
+    #send the obd codes too
+    result = await pipeline.process_image(image,obd_codes,request.claimId)
     
     detection_docs = []
     for d in result:
         detection_docs.append(
             DetectionModel(
-                claimId=None,
+                claimId=ObjectId(request.claimId),
                 part=d["part"],
                 damageType=d["damageType"],
                 severity=d["severity"],
                 obd_code=d["obd_code"],
+                internal=d["internal"],
                 decision=d["decision"],
                 reason=d["reason"],
-                cost=d["cost"]
+                image_url=d["image_url"],
+                cost=d["cost"],
+                flag=d["flag"]
             ).model_dump(exclude_unset=True)
             )
 
