@@ -1,6 +1,6 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-from helper import preprocessing, vectorizer, get_prediction, get_prediction_c
+from helper import preprocessing, vectorizer_tfidf, get_prediction, get_prediction_c
 
 # Initialize FastAPI app
 app = FastAPI()
@@ -17,7 +17,7 @@ async def predict_sentiment(request: FeedbackRequest):
     try:
         # Preprocess and vectorize the input feedback
         preprocessed_feedback = preprocessing(request.feedback)
-        vectorized_feedback = vectorizer(preprocessed_feedback)
+        vectorized_feedback = vectorizer_tfidf(preprocessed_feedback)
         prediction = get_prediction(vectorized_feedback)
         return {"prediction": prediction}
     except Exception as e:
@@ -31,7 +31,7 @@ async def predict_category(request: FeedbackRequest):
     try:
         # Preprocess and vectorize the input feedback
         preprocessed_feedback = preprocessing(request.feedback)
-        vectorized_feedback = vectorizer(preprocessed_feedback)
+        vectorized_feedback = vectorizer_tfidf(preprocessed_feedback)
         prediction = get_prediction_c(vectorized_feedback)
         return {"prediction": prediction}
     except Exception as e:
