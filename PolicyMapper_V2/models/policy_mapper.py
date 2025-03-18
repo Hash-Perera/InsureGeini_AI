@@ -105,6 +105,23 @@ rag_details = {
       "amount_details": {
         "limit": "As per the schedule of the policy, covering airbag replacement costs."
       }
+    },
+    {
+      "section": "Comprehensive Insurance",
+      "coverage": [
+        "Covers all damages to the vehicle except for the following: ",
+        "Wear and tear",
+        "Mechanical breakdown",
+        "Electrical failure",
+        "Consequential loss",
+        "Depreciation",
+        "Wear and tear",
+        "Damage to tyres, tubes",
+        
+      ],
+      "amount_details": {
+        "limit": "Full coverage for the vehicle"
+      }
     }
   ]
 }
@@ -148,7 +165,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
 
         prompt = f"""
         You are an insurance claims evaluator. Given the claim details, policy coverage, and vehicle details below, determine whether the claim should be approved or rejected. Provide the reasoning for your decision. 
-        Ensure that the decision is always valid, either "approved" or "rejected". Do not leave any decision ambiguous. Consider the severity of the damage, the policy exclusions, and the claim amount.
+        Ensure that the decision is always valid, either "approved" or "rejected". Do not leave any decision ambiguous. Consider the severity of the damage, the policy exclusions, and the claim amount .
 
         CLAIM DETAILS:
         - Claim ID: {claim_data.get('insuranceId', 'Unknown')}
@@ -234,12 +251,16 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
         detailed_results.append(detailed_result)
 
     total_cost = sum(damage.get('cost', 0.0) for damage in damage_detection_data)
-    overall_status = "approved" if all(result['evaluation']['approved'] for result in detailed_results) else "rejected"
+    # Calculate the total approved costs
+    approved_costs = sum(result['cost'] for result in detailed_results if result['evaluation']['approved'])
+    #overall_status = "approved" if all(result['evaluation']['approved'] for result in detailed_results) else "rejected"
+    overall_status = "rejected" if all(not result['evaluation']['approved'] for result in detailed_results) else "approved"
 
     return {
         "overall_status": overall_status,
         "total_cost": total_cost,
-        "damage_evaluations": detailed_results
+        "damage_evaluations": detailed_results,
+        "approved_costs": approved_costs
     }
 
 
@@ -344,5 +365,5 @@ vehicle_data = {
 }
 
 # # Example usage
-# result = evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data)
-# print(json.dumps(result, indent=4))
+#result = evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data)
+#print(json.dumps(result, indent=4))
