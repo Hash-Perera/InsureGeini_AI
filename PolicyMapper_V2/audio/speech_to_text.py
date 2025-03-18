@@ -26,5 +26,5 @@ insurance_jargon = [
 ]
 
 def transcribe_audio(audio_path: str) -> str:
-    result = model.transcribe(audio_path, language="en", initial_prompt=insurance_jargon.join(", "))
+    result = model.transcribe(audio_path, language="en", initial_prompt=", ".join(jargon for jargon in insurance_jargon))
     return result["text"]
