@@ -3,7 +3,7 @@ import pandas as pd
 import re
 import string
 import pickle
-
+from sklearn.feature_extraction.text import TfidfVectorizer
 from nltk.stem import PorterStemmer
 ps = PorterStemmer()
 
@@ -13,6 +13,9 @@ with open('static/model/sentiment_model.pickle', 'rb') as f:
 
 with open('static/model/categorization_model.pickle', 'rb') as f:
     modelc=pickle.load(f)
+
+with open('static/model/tfidf_vectorizer.pickle', 'rb') as f:
+    vectorizer = pickle.load(f)
 
 def remove_punctuation(text):
     for punctuation in string.punctuation:
@@ -40,18 +43,8 @@ def preprocessing(text):
 
 
 
-def vectorizer(ds):
-    vectorized_list=[]
-
-    for sentence in ds:
-        sentence_list=np.zeros(len(tokens))
-        for i in range(len(tokens)):
-            if tokens[i] in sentence.split():
-                sentence_list[i]=1
-        vectorized_list.append(sentence_list)
-
-    vectorized_list_new=np.asarray(vectorized_list,dtype=np.float32)
-    return vectorized_list_new
+def vectorizer_tfidf(text_series):
+    return vectorizer.transform(text_series)
 
 
 def get_prediction(vectorized_txt):
