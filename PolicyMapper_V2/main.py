@@ -158,19 +158,19 @@ async def main(claim_id: str | ObjectId) -> dict:
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data)
     pdf_generator = PDFGenerator()
-    pdf_generator.generate_pdf(data, "vehicle_damage_report.pdf")
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf")
 
     # upload the pdf to s3
     if await upload_pdf_to_s3(
-        "vehicle_damage_report.pdf",
-        f"{claim_record.get('user_id')}/{claim_record.get('claim_number')}/vehicle_damage_report.pdf"
+        f"temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf",
+        f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf"
     ):
         logger.info(f"PDF uploaded to s3 successfully")
     else:
         logger.error(f"Failed to upload PDF to s3")
         return {"error": "Failed to upload PDF to s3"}
     
-    
+
  
 
 @app.get("/", response_model=None)
