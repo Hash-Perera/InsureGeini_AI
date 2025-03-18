@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from audio.audio_pre_processing import process_audio
 from audio.speech_to_text import transcribe_audio
 from crud.claim import get_claim
+from models.summary_generator import generate_summary
 from helpers.util import download_audio_file, extract_metadata_from_audio_file_url, upload_pdf_to_s3
 import aio_pika
 import asyncio
@@ -12,7 +13,6 @@ from crud.policy import create_policy
 from crud.claim import update_claim_status_start, update_claim_status_end
 from contextlib import asynccontextmanager
 from core.db import verify_connection
-from Models.incident_generator import analyze_accident
 from crud.user import get_user
 from crud.vehicle import get_vehicle
 from crud.damage_detection import get_damage_detection
@@ -155,8 +155,16 @@ async def main(claim_id: str | ObjectId) -> dict:
     user_data = await get_user(claim_record.get("userId"))
     vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
     damage_detection_data = await get_damage_detection(claim_record.get("_id"))
+
+    incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data)
+
+
+    print(f"User data: {user_data}")
+    print(f"Vehicle data: {vehicle_data}")
+    print(f"Damage detection data: {damage_detection_data}")
+    print(f"Claim data: {claim_data}")
   
-    data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data)
+    data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data, incident_summary)
     pdf_generator = PDFGenerator()
     pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf")
 
@@ -169,6 +177,8 @@ async def main(claim_id: str | ObjectId) -> dict:
     else:
         logger.error(f"Failed to upload PDF to s3")
         return {"error": "Failed to upload PDF to s3"}
+    
+
     
 
  

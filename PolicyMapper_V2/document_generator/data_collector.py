@@ -1,6 +1,6 @@
 from datetime import datetime
 
-def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: dict, claim_data: dict):
+def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: list[dict], claim_data: dict, incident_summary: str) -> dict:
     
    # Extracting damage parts information
     damage_parts = []
@@ -30,7 +30,7 @@ def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: dic
         "damage_parts": damage_parts,
         "incident_description": claim_data.get('audio_to_text', 'N/A'),
         "photos": photos,
-        "incident_summary": "The vehicle sustained moderate damage. Repair costs are estimated at approximately $2,550. No injuries were reported, and both parties exchanged insurance information."
+        "incident_summary": incident_summary
     }
     
     return data
