@@ -28,7 +28,7 @@ def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: dic
         "weather": claim_data.get('weather', 'N/A'),
         "damage_cause": "Rear-ended at a red light",  # Replace with actual cause if available
         "damage_parts": damage_parts,
-        "incident_description": "A distracted driver failed to brake in time at a red light and collided with the rear of the insured vehicle. The impact resulted in a broken front bumper, minor dents on the hood, and a cracked left headlight.",
+        "incident_description": claim_data.get('audio_to_text', 'N/A'),
         "photos": photos,
         "incident_summary": "The vehicle sustained moderate damage. Repair costs are estimated at approximately $2,550. No injuries were reported, and both parties exchanged insurance information."
     }

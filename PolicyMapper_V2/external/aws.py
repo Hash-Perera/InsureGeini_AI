@@ -120,3 +120,12 @@ class S3Client:
         except ClientError as e:
             logger.error(f"Error listing files from S3: {e}")
             return []
+        
+    def upload_file(self, bucket_name: str, s3_key: str, local_path: str) -> str | None:
+        try:
+            self.s3_client.upload_file(local_path, bucket_name, s3_key)
+            logger.info(f"Successfully uploaded {local_path} to {s3_key} in {bucket_name}")
+            return s3_key
+        except Exception as e:
+            logger.error(f"Error uploading file to S3: {e}")
+            return None

@@ -5,7 +5,7 @@ import os
 class PDFGenerator:
     """Generates a PDF report from an HTML template with external CSS support."""
 
-    def __init__(self, template_folder="templates", output_folder="output"):
+    def __init__(self, template_folder="templates", output_folder="temp"):
         self.env = Environment(loader=FileSystemLoader(template_folder))
         self.output_folder = output_folder
         os.makedirs(output_folder, exist_ok=True)

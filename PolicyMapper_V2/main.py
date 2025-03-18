@@ -1,7 +1,8 @@
-from bson import ObjectId
 from fastapi import FastAPI
+from audio.audio_pre_processing import process_audio
+from audio.speech_to_text import transcribe_audio
 from crud.claim import get_claim
-from helpers.util import download_audio_file, extract_metadata_from_audio_file_url
+from helpers.util import download_audio_file, extract_metadata_from_audio_file_url, upload_pdf_to_s3
 import aio_pika
 import asyncio
 import json
@@ -11,7 +12,6 @@ from crud.policy import create_policy
 from crud.claim import update_claim_status_start, update_claim_status_end
 from contextlib import asynccontextmanager
 from core.db import verify_connection
-from audio.util import process_audio_file
 from Models.incident_generator import analyze_accident
 from crud.user import get_user
 from crud.vehicle import get_vehicle
@@ -100,6 +100,10 @@ async def lifespan(app: FastAPI):
     yield  # Allow FastAPI to run
     # Cleanup if necessary (optional)
     task.cancel()
+from core.logger import Logger
+from bson import ObjectId
+
+logger = Logger()
 
 app = FastAPI(
     title="Claims Processing API",
@@ -107,64 +111,75 @@ app = FastAPI(
     version="1.0.0",
    # lifespan=lifespan
 )
-
-
-
+logger.info("Starting API")
 
 
 async def main(claim_id: str | ObjectId) -> dict:
     if not ObjectId.is_valid(claim_id):
+        logger.error(f"Invalid claim_id: {claim_id}")
         return {"error": "Invalid claim_id"}
+    
+    logger.info(f"Getting claim record for claim_id: {claim_id}")
 
     claim_record: dict = await get_claim(claim_id)
     audio_file_url: str = claim_record.get("audio")
+    logger.info(f"Extracting metadata from audio file url: {audio_file_url}")
     audio_file_metadata: dict = await extract_metadata_from_audio_file_url(
         audio_file_url
     )
+    logger.info(f"Downloading audio file to temp directory")
     audio_file_saved_path: str | None = await download_audio_file(
         audio_file_metadata,
         f"./temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/{audio_file_metadata.get('audio_file_name')}",
     )
     if audio_file_saved_path is None:
+        logger.error(f"Failed to download audio file")
         return {"error": "Failed to download audio file"}
     
+    logger.info(f"Processing audio file")
+    processed_audio_file_path: str | None = process_audio(
+        audio_file_saved_path,
+        f"./temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/{audio_file_metadata.get('audio_file_name')}",
+    )
+    if processed_audio_file_path is None:
+        logger.error(f"Failed to process audio file")
+        return {"error": "Failed to process audio file"}
+    
+    logger.info(f"Audio file processed successfully")
+
+    transcribed_text = transcribe_audio(processed_audio_file_path)
+    logger.info(f"Transcribed text: {transcribed_text}")
     
     claim_data = claim_record
+    claim_data['audio_to_text'] = transcribed_text
     user_data = await get_user(claim_record.get("userId"))
     vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
     damage_detection_data = await get_damage_detection(claim_record.get("_id"))
-    
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data)
     pdf_generator = PDFGenerator()
-    pdf_generator.generate_pdf(data, "vehicle_damage_report.pdf")
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf")
+
+    # upload the pdf to s3
+    if await upload_pdf_to_s3(
+        f"temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf",
+        f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf"
+    ):
+        logger.info(f"PDF uploaded to s3 successfully")
+    else:
+        logger.error(f"Failed to upload PDF to s3")
+        return {"error": "Failed to upload PDF to s3"}
     
-    # Process the downloaded audio file
-    #try:
-       # transcribed_text = process_audio_file(audio_file_saved_path)
-        #print("Transcribed text in main function: ")
-        #print(transcribed_text)
-        
-        #analysis = analyze_accident(transcribed_text)
-        #print("Analysis in main function: ")
-        
-        #return {
-        #    "transcription": transcribed_text,
-        #    "analysis": analysis
-        #}
-    
-    #except Exception as e:
-    #    return {"error": str(e)}
-    
+
  
 
 @app.get("/", response_model=None)
 async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
+    logger.info(f"Received request for claim_id: {claim_id}")
     await main(claim_id)
     return {"Hello": "World"}
 
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="localhost", port=8000)
