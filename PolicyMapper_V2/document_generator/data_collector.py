@@ -1,5 +1,8 @@
 from datetime import datetime
 from multipledispatch import dispatch
+from urllib.parse import urlparse
+import os
+import requests
 
 
 @dispatch(dict, dict, list, dict, str)
@@ -15,7 +18,31 @@ def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: lis
         })
     
     # Extracting photos
-    photos = claim_data.get('damageImages', [])
+    photos = []
+    for damage in damage_detection_data:
+        if 'image_url' in damage:
+            image_url = damage['image_url']
+            local_path = f".{(claim_data.get('userId'))}/temp/images/{os.path.basename(urlparse(image_url).path)}"
+
+            # Try to download the image
+            try:
+                response = requests.get(image_url, stream=True)
+                if response.status_code == 200:
+                    # Create the local directory if it doesn't exist
+                    os.makedirs(os.path.dirname(local_path), exist_ok=True)
+
+                    # Save the image to the local path
+                    with open(local_path, 'wb') as f:
+                        for chunk in response.iter_content(chunk_size=8192):
+                            f.write(chunk)
+                    photos.append(local_path)
+                    print(f"Downloaded image: {image_url}")
+                else:
+                    print(f"Failed to download image from URL: {image_url}, Status code: {response.status_code}")
+            except Exception as e:
+                print(f"Error downloading image from URL {image_url}: {e}")
+
+    print(f"Photos: {photos}")
     
     # Constructing the data dictionary
     data = {
@@ -66,6 +93,8 @@ def collect_data(user_data: dict, vehicle_data: dict, policy_data: dict, inciden
         vehicle_data['vehiclePhotos']['left'],
         vehicle_data['vehiclePhotos']['right']
     ]
+    
+    print("damage parts", damage_parts)
 
     # Constructing the data dictionary
     data = {
@@ -86,7 +115,7 @@ def collect_data(user_data: dict, vehicle_data: dict, policy_data: dict, inciden
         "total_estimation": f"${total_estimation}",
         "approved_amount": f"${approved_amount}",
         "status_summary": policy_data['overall_status'].capitalize(),
-        "decision_with_reason": f"{policy_data['overall_status'].capitalize()} - {damage_parts[0]['reason']}"  # Example decision summary
+       # "decision_with_reason": f"{policy_data['overall_status'].capitalize()} - {damage_parts[0]['reason']}"  # Example decision summary
     }
 
     return data
