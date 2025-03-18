@@ -1,5 +1,6 @@
 from fastapi import FastAPI
 from audio.audio_pre_processing import process_audio
+from audio.speech_to_text import transcribe_audio
 from crud.claim import get_claim
 from helpers.util import download_audio_file, extract_metadata_from_audio_file_url
 import aio_pika
@@ -11,7 +12,6 @@ from crud.policy import create_policy
 from crud.claim import update_claim_status_start, update_claim_status_end
 from contextlib import asynccontextmanager
 from core.db import verify_connection
-from audio.util import process_audio_file
 from Models.incident_generator import analyze_accident
 from crud.user import get_user
 from crud.vehicle import get_vehicle
@@ -149,34 +149,19 @@ async def main(claim_id: str | ObjectId) -> dict:
         return {"error": "Failed to process audio file"}
     
     logger.info(f"Audio file processed successfully")
-        
+
+    transcribed_text = transcribe_audio(processed_audio_file_path)
+    logger.info(f"Transcribed text: {transcribed_text}")
     
     claim_data = claim_record
+    claim_data['audio_to_text'] = transcribed_text
     user_data = await get_user(claim_record.get("userId"))
     vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
     damage_detection_data = await get_damage_detection(claim_record.get("_id"))
-    
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data)
     pdf_generator = PDFGenerator()
     pdf_generator.generate_pdf(data, "vehicle_damage_report.pdf")
-    
-    # Process the downloaded audio file
-    #try:
-       # transcribed_text = process_audio_file(audio_file_saved_path)
-        #print("Transcribed text in main function: ")
-        #print(transcribed_text)
-        
-        #analysis = analyze_accident(transcribed_text)
-        #print("Analysis in main function: ")
-        
-        #return {
-        #    "transcription": transcribed_text,
-        #    "analysis": analysis
-        #}
-    
-    #except Exception as e:
-    #    return {"error": str(e)}
     
  
 

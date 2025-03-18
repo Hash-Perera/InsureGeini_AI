@@ -1,5 +1,6 @@
 from pydub import AudioSegment
 from core.logger import Logger
+import subprocess
 
 logger = Logger()
 
@@ -20,3 +21,19 @@ def process_audio(input_path: str, output_path: str):
         logger.error(f"Error processing audio: {e}")
         return None
     return output_path
+
+
+def noise_reduction(input_path, output_path):
+    try:
+        logger.info(f"Reducing noise from {input_path} to {output_path}")
+        cmd = [
+            "ffmpeg", "-i", input_path, 
+            "-af", "highpass=f=200, lowpass=f=3000, dynaudnorm",
+            output_path
+        ]
+        subprocess.run(cmd)
+        logger.info(f"Noise reduction completed successfully")
+        return output_path
+    except Exception as e:
+        logger.error(f"Error reducing noise: {e}")
+        return None
