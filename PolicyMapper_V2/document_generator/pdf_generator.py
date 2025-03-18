@@ -30,7 +30,7 @@ class PDFGenerator:
         
         print(f"✅ PDF Generated: {pdf_path}")
 
-# Example Usage
+# Example Usage of the PDFGenerator class
 if __name__ == "__main__":
     sample_data = {
     "vehicle_number_plate": "NTJ 455",
