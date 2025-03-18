@@ -19,6 +19,7 @@ from crud.vehicle import get_vehicle
 from crud.damage_detection import get_damage_detection
 from document_generator.data_collector import collect_data
 from document_generator.pdf_generator import PDFGenerator
+from bson import ObjectId
 
 load_dotenv()
 
@@ -102,7 +103,6 @@ async def lifespan(app: FastAPI):
     # Cleanup if necessary (optional)
     task.cancel()
 from core.logger import Logger
-from bson import ObjectId
 
 logger = Logger()
 
@@ -114,6 +114,10 @@ app = FastAPI(
 )
 logger.info("Starting API")
 
+def convert_objectid(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 async def main(claim_id: str | ObjectId) -> dict:
     if not ObjectId.is_valid(claim_id):
@@ -154,14 +158,23 @@ async def main(claim_id: str | ObjectId) -> dict:
     claim_data = claim_record
     claim_data['audio_to_text'] = transcribed_text
     user_data = await get_user(claim_record.get("userId"))
-    vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
-    damage_detection_data = await get_damage_detection(claim_record.get("_id"))
 
+    print("\n")
+    print(f"User data: {user_data}")
+    print("\n")
+
+    vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
+
+    print("\n")
+    print(f"Vehicle data: {vehicle_data}")
+    print("\n")
+
+    damage_detection_data = await get_damage_detection(claim_record.get("_id"))
     incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data)
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data, incident_summary)
     pdf_generator = PDFGenerator()
-    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf")
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf", "report_template.html")
 
     # upload the pdf to s3
     if await upload_pdf_to_s3(
@@ -174,7 +187,15 @@ async def main(claim_id: str | ObjectId) -> dict:
         return {"error": "Failed to upload PDF to s3"}
     
     result = evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data)
-    print(json.dumps(result, indent=4))
+    print("\n")
+    print(json.dumps(result, indent=4, default=convert_objectid))
+    print("\n")
+
+
+    data = collect_data(user_data, vehicle_data, result, incident_summary)
+    pdf_generator = PDFGenerator()
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf", "decision_report.html")
+
  
 
 @app.get("/", response_model=None)

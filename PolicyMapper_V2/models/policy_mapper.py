@@ -218,7 +218,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
             result['approved'] = result['status'] == "approved"
 
         detailed_result = {
-            "damage_id": damage_id,
+            "damage_id": str(damage_id),
             "part_damaged": part_damaged,
             "damage_type": damage_type,
             "severity": severity,
@@ -243,7 +243,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
     }
 
 
-claim_data = claim_data = {
+claim_data = {
     "_id": "67a1cacfeace4f9501a8c964",
     "insuranceId": "insuregeni-126735",
     "nicNo": "1957603405",
@@ -276,7 +276,7 @@ claim_data = claim_data = {
     "audio_to_text": "I was driving when another car hit me from the side."
 }
 
-damage_detection_data = damage_detection_data = [
+damage_detection_data = [
     {
         "_id": "67d7227b232a3d73d4eafc0b",
         "claimId": "67a1cacfeace4f9501a8c964",
@@ -317,7 +317,7 @@ damage_detection_data = damage_detection_data = [
     }
 ]
 
-vehicle_data = vehicle_data = {
+vehicle_data = {
     "_id": "67d0532009cadf38a9976547",
     "userId": "6748472eae0fb7cdbf7190fa",
     "insuranceCard": {
