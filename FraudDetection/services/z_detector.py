@@ -681,8 +681,6 @@ def exraction_color(image_url):
         if messages.data and messages.data[0].content:
             extracted_text = messages.data[0].content[0].text.value  # Fix: Access .text directly
 
-        print(messages.data[0].content)
-
         return {
             "status": True, 
             "error": None,  # Fix: Error should be None if success
