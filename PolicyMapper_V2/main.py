@@ -1,5 +1,5 @@
-from bson import ObjectId
 from fastapi import FastAPI
+from audio.audio_pre_processing import process_audio
 from crud.claim import get_claim
 from helpers.util import download_audio_file, extract_metadata_from_audio_file_url
 import aio_pika
@@ -11,6 +11,7 @@ from crud.policy import create_policy
 from crud.claim import update_claim_status_start, update_claim_status_end
 from contextlib import asynccontextmanager
 from core.db import verify_connection
+
 load_dotenv()
 
 RABBITMQ_URL = os.getenv("RABBITMQ_URL")
@@ -92,6 +93,10 @@ async def lifespan(app: FastAPI):
     yield  # Allow FastAPI to run
     # Cleanup if necessary (optional)
     task.cancel()
+from core.logger import Logger
+from bson import ObjectId
+
+logger = Logger()
 
 app = FastAPI(
     title="Claims Processing API",
@@ -99,6 +104,7 @@ app = FastAPI(
     version="1.0.0",
    # lifespan=lifespan
 )
+logger.info("Starting API")
 
 
 
@@ -106,29 +112,46 @@ app = FastAPI(
 
 async def main(claim_id: str | ObjectId) -> dict:
     if not ObjectId.is_valid(claim_id):
+        logger.error(f"Invalid claim_id: {claim_id}")
         return {"error": "Invalid claim_id"}
+    
+    logger.info(f"Getting claim record for claim_id: {claim_id}")
 
     claim_record: dict = await get_claim(claim_id)
     audio_file_url: str = claim_record.get("audio")
+    logger.info(f"Extracting metadata from audio file url: {audio_file_url}")
     audio_file_metadata: dict = await extract_metadata_from_audio_file_url(
         audio_file_url
     )
+    logger.info(f"Downloading audio file to temp directory")
     audio_file_saved_path: str | None = await download_audio_file(
         audio_file_metadata,
         f"./temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/{audio_file_metadata.get('audio_file_name')}",
     )
     if audio_file_saved_path is None:
+        logger.error(f"Failed to download audio file")
         return {"error": "Failed to download audio file"}
     
+    logger.info(f"Processing audio file")
+    processed_audio_file_path: str | None = process_audio(
+        audio_file_saved_path,
+        f"./temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/{audio_file_metadata.get('audio_file_name')}",
+    )
+    if processed_audio_file_path is None:
+        logger.error(f"Failed to process audio file")
+        return {"error": "Failed to process audio file"}
+    
+    logger.info(f"Audio file processed successfully")
+        
     
 
 @app.get("/", response_model=None)
-async def read_root(claim_id: str = "67d5ac786c933d00f0f95d49") -> dict:
+async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
+    logger.info(f"Received request for claim_id: {claim_id}")
     await main(claim_id)
     return {"Hello": "World"}
 
 
 if __name__ == "__main__":
     import uvicorn
-
     uvicorn.run(app, host="localhost", port=8000)
