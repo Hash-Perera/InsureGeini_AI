@@ -1,7 +1,7 @@
 #Add post processing combine the results in to an single vector
 
 from collections import defaultdict
-from database import db
+from services.database import db
 from motor.motor_asyncio import AsyncIOMotorClient
 
 class PostProcess:

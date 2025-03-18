@@ -1,6 +1,6 @@
-from AiPipeline import AiPipeline
-from utils.PreProcess import PreProcess
-from utils.PostProcess import PostProcess
+from services.AiPipeline import AiPipeline
+from services.utils.PreProcess import PreProcess
+from services.utils.PostProcess import PostProcess
 
 class AIModelPipelineBuilder:
 

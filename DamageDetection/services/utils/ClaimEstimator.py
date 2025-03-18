@@ -1,5 +1,5 @@
 #from utils.RuleEngine import evaluate_rules
-from utils.NewRuleEngine import evaluate_rules
+from services.utils.NewRuleEngine import evaluate_rules
 
 def estimate_claim(unified_vector):
     #Temporary datastore for part prices

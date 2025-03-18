@@ -6,7 +6,7 @@ from fastapi import UploadFile
 from dotenv import load_dotenv
 from PIL import Image
 import io
-from utils.AwsFiles.aws_config import s3
+from services.utils.AwsFiles.aws_config import s3
 # from services.aws.aws_config import s3
 
 # Load environment variables

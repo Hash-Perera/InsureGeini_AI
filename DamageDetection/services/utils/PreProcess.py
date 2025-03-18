@@ -8,7 +8,7 @@ import boto3
 import io
 from PIL import Image
 from fastapi import UploadFile
-from utils.AwsFiles.s3_upload import upload_single_file
+from services.utils.AwsFiles.s3_upload import upload_single_file
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input
 
@@ -94,7 +94,7 @@ class PreProcess:
             cropped_part_rgb = cv2.cvtColor(cropped_part, cv2.COLOR_BGR2RGB)
 
             # Save the cropped face to a temporary file
-            cropped_path = "utils/temp/croppped_part.jpg"
+            cropped_path = "services/utils/temp/croppped_part.jpg"
             cv2.imwrite(cropped_path, cropped_part_rgb)
 
             # Open the saved image file and read it as bytes
