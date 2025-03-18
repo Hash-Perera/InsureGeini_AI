@@ -1,6 +1,8 @@
 #Add post processing combine the results in to an single vector
 
 from collections import defaultdict
+from database import db
+from motor.motor_asyncio import AsyncIOMotorClient
 
 class PostProcess:
     
@@ -54,7 +56,7 @@ class PostProcess:
 
         return matched_parts
     
-    def create_vector(self,partSeverity,damageParts):
+    def create_vector(self,partSeverity,damageParts,cropped_images_s3):
         
         if len(damageParts) != len(partSeverity):
             print("Error: Length of part severity and damage parts do not match.")
@@ -65,13 +67,46 @@ class PostProcess:
                 part_name,severity = partSeverity[i]
                 if part["part"] == part_name:
                     part["severity"] = severity
-                
+                    for s3_url, label in cropped_images_s3:
+                        if label == part_name:
+                            part["image_url"] = s3_url
+                            break
+
         return damageParts
     
     #To be changed or removed
-    def create_unified_vector(self,external_vector):
+    async def create_unified_vector(self,external_vector,codes):
         unified_vector = external_vector
+        door_count = sum(1 for d in unified_vector if d['part'] == 'damaged-door')
+
         for damage in unified_vector:
+            # Fetch relevant OBD codes for the damaged part
+            obd_codes_cursor = db.obd_codes.find({"Part": "damaged-door"})
+            obd_codes_list = await obd_codes_cursor.to_list(length=None)  # Convert cursor to a list
+            # Initialize default values
             damage['obd_code'] = False
+            damage['internal'] = "No internal damage detected"
+            damage['flag'] = "-"
+
+            # If part is damaged-door, handle door-specific logic
+            if damage['part'] == 'damaged-door':
+                for oc in obd_codes_list:
+                    if oc.get("Code") in codes:
+                        print("Matched")
+                        damage['obd_code'] = True
+                        damage['internal'] = oc.get("Cause", "Unknown cause")
+                        break  # Stop checking after the first match
+                
+                # If multiple doors are damaged, set flag
+                if door_count > 1 and damage['obd_code'] == True:
+                    damage['flag'] = "Multiple doors damaged - verify with user for internal damages"
+
+            # Handling other damaged parts
+            elif damage['part'] in ['damaged-front-bumper', 'damaged-rear-bumper', 'damaged-fender']:
+                for oc in obd_codes_list:
+                    if oc.get("Code") in codes:
+                        damage['obd_code'] = True
+                        damage['internal'] = oc.get("Cause", "Unknown cause")
+                        break  # Stop after first match
 
         return unified_vector

@@ -4,6 +4,11 @@ import io
 import cv2
 import numpy as np
 import matplotlib.pyplot as plt
+import boto3
+import io
+from PIL import Image
+from fastapi import UploadFile
+from utils.AwsFiles.s3_upload import upload_single_file
 from tensorflow.keras.preprocessing.image import load_img, img_to_array
 from tensorflow.keras.applications.vgg16 import preprocess_input
 
@@ -75,4 +80,42 @@ class PreProcess:
 
         return cropped_data
 
+    @staticmethod
+    def upload_to_s3(image_np, file_name):
+        pass
+
+
+    @staticmethod
+    async def upload_cropped_images(cropped_images,claimId):
+        uploaded_images = []
+
+        for i, (image_array, part_label, cropped_part) in enumerate(cropped_images):
+            # Convert BGR (OpenCV) to RGB for PIL
+            cropped_part_rgb = cv2.cvtColor(cropped_part, cv2.COLOR_BGR2RGB)
+
+            # Save the cropped face to a temporary file
+            cropped_path = "utils/temp/croppped_part.jpg"
+            cv2.imwrite(cropped_path, cropped_part_rgb)
+
+            # Open the saved image file and read it as bytes
+            with open(cropped_path, "rb") as file:
+                image_bytes = io.BytesIO(file.read())
+
+            # Create an UploadFile object
+            cropped_face_file = UploadFile(filename="cropped_damaged_part.jpg", file=image_bytes)
+
+            folder_path = f"cropped_parts/{claimId}/{part_label}_{i}"
+            # Upload to S3
+            s3_url = await upload_single_file(cropped_face_file, folder_path)
+
+            print(s3_url)
+
+            # # Define file name and upload
+            # file_name = f"cropped_parts/{part_label}_{i}.jpg"
+            # #s3_url = PreProcess.upload_to_s3(cropped_part_rgb, file_name)
+            # s3_url = f"https://s3.amazonaws.com/{file_name}"
+
+            uploaded_images.append((s3_url, part_label))
+
+        return uploaded_images
 
