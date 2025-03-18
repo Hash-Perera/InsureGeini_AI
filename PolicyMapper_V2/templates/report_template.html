@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vehicle Damage Report</title>
+    <link rel="stylesheet" href="./report.css" />
+    <style></style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="templates/logo.png" alt="Company Logo" />
+      </div>
+      <div class="contact-info">
+        <p><strong>InsureGeni</strong></p>
+        <p>1234 Main Street, City, State, 56789</p>
+        <p>Phone: (123) 456-7890</p>
+        <p>Email: info@insurancecompany.com</p>
+      </div>
+    </header>
+    <div class="report-title">
+      <h1>Vehicle Damage Report</h1>
+    </div>
+    <div class="basic-container">
+      <div class="basic-container-inside">
+        <span class="basic-span"
+          >NTJ 455 / 3 May 2023 / 7HGSA1DFGT14554 / 2015</span
+        >
+        <span class="basic-span">Toyota Prius / Ian Lee</span>
+      </div>
+      <span class="basic-status">complete</span>
+    </div>
+
+    <div class="report-header">
+      <div class="header-item">Score</div>
+      <div class="header-item">Flagged items</div>
+      <div class="header-item">Actions</div>
+    </div>
+
+    <div class="report-details">
+      <div class="detail-row">
+        <div class="label">Vehicle Registration Number</div>
+
+        <div class="value">{{vehicle_number_plate}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Identification Number</div>
+        <div class="value">{{vehicle_vin}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Year, Make & Model</div>
+        <div class="value">{{vehicle_make_model}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Report conducted on (Date and Time)</div>
+        <div class="value">{{report_date}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Fleet Manager's Full Name</div>
+        <div class="value">{{fleet_manager}}</div>
+      </div>
+    </div>
+
+    <div class="report-header">
+      <div class="header-item">Audit</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">General Information</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Driver's Name</div>
+      <div class="value">{{driver_name}}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Driver's License img</div>
+      <div class="value">Image</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Phone Number</div>
+      <div class="value">{{driver_phone}}</div>
+    </div>
+
+    <div class="detail-row-title">
+      <div class="label-title">Damage Details</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Date and time of the incident</div>
+      <div class="value">{{incident_date}}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Location of the incident</div>
+      <div class="value">{{incident_location}}</div>
+    </div>
+    <div class="detail-row-status">
+      <div class="label-status">Whether condition</div>
+      <div class="value-status">{{weather}}</div>
+    </div>
+    <div class="detail-row-status">
+      <div class="label-status">What cause the damage ?</div>
+      <div class="value-status-red">{{damage_cause}}</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Damage Parts</div>
+    </div>
+    {% for damage_part in damage_parts %}
+    <div class="detail-row-status">
+      <div class="label-status">{{damage_part.part}}</div>
+      <div class="value2">Estimated Cost: {{damage_part.cost}}</div>
+      <div class="value-status-red">{{damage_part.severity}}</div>
+    </div>
+    {% endfor %}
+    <div class="detail-row-title">
+      <div class="label-title">Description of the incident</div>
+    </div>
+    <div class="value2">{{incident_description}}</div>
+    <div class="detail-row-title">
+      <div class="label-title">Take photo evidence of vehicle damage</div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">Summary of the incident</div>
+    </div>
+    {% for photo in photos %}
+    <img src="file://{{ photo }}" alt="Damage Photo" />
+    {% endfor %}
+    <div class="value2">{{incident_summary}}</div>
+
+    <div
+      style="
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 40px;
+        font-family: Arial, sans-serif;
+      "
+    >
+      <span style="font-weight: bold">CONFIDENTIAL</span> | This report is
+      generated automatically by InsureGeni™ Claims Management System.<br />
+      <span style="font-size: 10px"
+        >© 2025 InsureGeni. All rights reserved. Unauthorized distribution is
+        strictly prohibited.</span
+      >
+    </div>
+  </body>
+</html>

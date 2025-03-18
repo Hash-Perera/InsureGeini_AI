@@ -1,0 +1,233 @@
+body {
+  font-family: Arial, sans-serif;
+  width: 100%;
+}
+h1,
+h2 {
+  color: #111212;
+}
+.section {
+  margin-bottom: 20px;
+}
+.data {
+  margin-left: 20px;
+}
+.signature {
+  margin-top: 40px;
+}
+.footer {
+  margin-top: 50px;
+  font-size: 12px;
+  text-align: center;
+  color: #666;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+img {
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 10px 0;
+}
+header {
+  background-color: #000000;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.logo img {
+  mix-blend-mode: multiply;
+  width: 120px;
+}
+.address {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.contact-info p {
+  margin: 0;
+}
+
+.report-title {
+  text-align: start;
+  font-size: 17px;
+}
+
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.basic-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  align-items: center;
+}
+
+.basic-container-inside {
+  display: flex;
+  flex-direction: column;
+}
+.basic-span {
+  text-align: start;
+  font-size: 14px;
+  color: #767676;
+}
+.basic-status {
+  color: green;
+  font-size: small;
+}
+
+.report-header {
+  margin-top: 18px;
+  background-color: #dcdcdc;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.header-item {
+  font-weight: bold;
+  color: #333;
+}
+
+.report-details {
+}
+
+.detail-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-left: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.label {
+  font-weight: bold;
+  color: #003366;
+}
+.label-title {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 24px;
+  color: #003366;
+}
+.detail-row-title {
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.value {
+  color: #555;
+  padding-right: 10px;
+}
+.value2 {
+  color: #555;
+  padding: 10px 0;
+}
+
+.detail-row-status {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-left: 10px;
+  border-bottom: 1px solid #ddd;
+}
+.label-status {
+  padding: 10px 0;
+  font-weight: bold;
+  color: #003366;
+}
+.value-status {
+  color: #080808;
+  font-weight: semibold;
+  background-color: orange;
+  height: 45px;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+.value-status-red {
+  color: #ffffff;
+  font-weight: semibold;
+  background-color: red;
+  height: 45px;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.damage-details-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.damage-details {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+.damage-estimated {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.damage-status {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.total-estimation {
+  background-color: #dcdcdc;
+  margin-top: 50px;
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.total-estimation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.total-estimation-item-label {
+  font-weight: bold;
+  color: #003366;
+}

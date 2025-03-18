@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Decision Report</title>
+    <link rel="stylesheet" href="report.css" />
+    <style></style>
+  </head>
+  <body>
+    <header>
+      <div class="logo">
+        <img src="logo.png" alt="Company Logo" />
+      </div>
+      <div class="contact-info">
+        <p><strong>InsureGeni</strong></p>
+        <p>1234 Main Street, City, State, 56789</p>
+        <p>Phone: (123) 456-7890</p>
+        <p>Email: info@insurancecompany.com</p>
+      </div>
+    </header>
+    <div class="report-title">
+      <h1>Vehicle Damage Report</h1>
+    </div>
+    <div class="basic-container">
+      <div class="basic-container-inside">
+        <span class="basic-span"
+          >NTJ 455 / 3 May 2023 / 7HGSA1DFGT14554 / 2015</span
+        >
+        <span class="basic-span">Toyota Prius / Ian Lee</span>
+      </div>
+      <span class="basic-status">complete</span>
+    </div>
+
+    <div class="report-header">
+      <div class="header-item">Score</div>
+      <div class="header-item">Flagged items</div>
+      <div class="header-item">Actions</div>
+    </div>
+
+    <div class="report-details">
+      <div class="detail-row">
+        <div class="label">Vehicle Registration Number</div>
+
+        <div class="value">{{vehicle_number_plate}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Identification Number</div>
+        <div class="value">{{vehicle_vin}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Vehicle Year, Make & Model</div>
+        <div class="value">{{vehicle_make_model}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Report conducted on (Date and Time)</div>
+        <div class="value">{{report_date}}</div>
+      </div>
+      <div class="detail-row">
+        <div class="label">Fleet Manager's Full Name</div>
+        <div class="value">{{fleet_manager}}</div>
+      </div>
+    </div>
+    <div class="detail-row-title">
+      <div class="label-title">General Information</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Driver's Name</div>
+      <div class="value">{{driver_name}}</div>
+    </div>
+    <div class="detail-row">
+      <div class="label">Phone Number</div>
+      <div class="value">{{driver_phone}}</div>
+    </div>
+
+    <div class="report-header">
+      <div class="header-item">Damage Details Summary</div>
+      <div class="header-item">Estimated Damage Cost</div>
+      <div class="header-item">Status</div>
+    </div>
+    <div class="damage-details-container">
+      <div class="damage-details">
+        <div class="damage-details-item">
+          <div class="damage-details-item-label">Damage Type</div>
+          <div class="damage-details-item-value">{{damage_type}}</div>
+        </div>
+        <div class="damage-details-item">
+          <div class="damage-details-item-label">Desision</div>
+          <div class="damage-details-item-value">{{damage_type}}</div>
+        </div>
+        <div class="damage-details-item">
+          <div class="damage-details-item-label">Serverity</div>
+          <div class="damage-details-item-value">{{damage_type}}</div>
+        </div>
+        <div class="damage-details-item">
+          <div class="damage-details-item-label">Damage Details</div>
+          <div class="damage-details-item-value">{{damage_reason}}</div>
+        </div>
+      </div>
+      <div class="damage-estimated">
+        <div class="damage-estimated-item">
+          <div class="damage-estimated-item-value">{{estimated_cost}}</div>
+        </div>
+      </div>
+      <div class="damage-status">
+        <div class="damage-status-item">
+          <div class="damage-status-item-label">{{Status}}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Total estimation -->
+    <div class="total-estimation">
+      <div class="total-estimation-item">
+        <div class="total-estimation-item-label">Total Estimation</div>
+        <div class="total-estimation-item-value">{{total_estimation}}</div>
+      </div>
+      <div class="total-estimation-item">
+        <div class="total-estimation-item-label">Status summary</div>
+        <div class="total-estimation-item-value">{{status_summary}}</div>
+      </div>
+      <div class="total-estimation-item">
+        <div class="total-estimation-item-label">User maximum limit</div>
+        <div class="total-estimation-item-value">{{user_maximum_limit}}</div>
+      </div>
+      <div class="total-estimation-item">
+        <div class="total-estimation-item-label">Approved Amount</div>
+        <div class="total-estimation-item-value">{{approved_amount}}</div>
+      </div>
+    </div>
+
+    <!-- Decision -->
+    <div class="detail-row-title">
+      <div class="label-title">Decision Summary</div>
+    </div>
+    <div class="decision-summary">
+      <div class="decision-summary-item">
+        <div class="decision-summary-item-label">Decision</div>
+        <div class="decision-summary-item-value">{{decision_with_reason}}</div>
+      </div>
+    </div>
+
+    <div
+      style="
+        background-color: #f8f9fa;
+        border-top: 1px solid #dee2e6;
+        padding: 20px;
+        text-align: center;
+        font-size: 12px;
+        color: #6c757d;
+        margin-top: 40px;
+        font-family: Arial, sans-serif;
+      "
+    >
+      <span style="font-weight: bold">CONFIDENTIAL</span> | This report is
+      generated automatically by InsureGeni™ Claims Management System.<br />
+      <span style="font-size: 10px"
+        >© 2025 InsureGeni. All rights reserved. Unauthorized distribution is
+        strictly prohibited.</span
+      >
+    </div>
+  </body>
+</html>
