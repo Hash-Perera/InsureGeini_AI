@@ -204,6 +204,22 @@ async def main(claim_id: str | ObjectId) -> dict:
         logger.info(f"PDF uploaded to s3 successfully")
     else:
         logger.error(f"Failed to upload PDF to s3")
+        
+        
+        
+        
+    final_result = {
+            "audioToTextConvertedContext": transcribed_text,
+            "status": result.get('overall_status'),
+            "estimation_requested": result.get('total_cost'),
+            "estimation_approved": result.get('approved_costs'),
+            "reason": "Rear-ended at a red light",
+            "incidentReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf",
+            "decisionReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf"
+    }
+        
+    new_policy_record = await create_policy(result=final_result, claim_id=claim_id)
+    print(f"📝 Inserted to fraud collection: {new_policy_record}")
  
 @app.get("/", response_model=None)
 async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:

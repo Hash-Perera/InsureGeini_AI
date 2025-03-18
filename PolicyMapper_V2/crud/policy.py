@@ -1,4 +1,3 @@
-from bson import ObjectId
 from core.db import report_collection
 from datetime import datetime
 
