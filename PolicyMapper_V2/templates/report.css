@@ -179,3 +179,55 @@ header {
   text-align: center;
   justify-content: center;
 }
+
+.damage-details-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.damage-details {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+  border-left: 1px solid #ddd;
+}
+
+.damage-estimated {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.damage-status {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.total-estimation {
+  background-color: #dcdcdc;
+  margin-top: 50px;
+  padding: 10px 0;
+  display: flex;
+  justify-content: space-between;
+}
+
+.total-estimation-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 0;
+}
+
+.total-estimation-item-label {
+  font-weight: bold;
+  color: #003366;
+}
