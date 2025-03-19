@@ -66,56 +66,74 @@ def collect_data(user_data: dict, vehicle_data: dict, damage_detection_data: lis
     return data
 
 
-@dispatch(dict, dict, dict, str)
-def collect_data(user_data: dict, vehicle_data: dict, policy_data: dict, incident_summary: str) -> dict:
-    # Extracting damage parts information
+@dispatch(dict, dict, dict, str, dict)
+def collect_data(user_data: dict, vehicle_data: dict, policy_data: dict, incident_summary: str, claim_data: dict) -> dict:
+    # Check the type of policy_data and claim_data to handle different structures
     damage_parts = []
     total_estimation = 0
     approved_amount = 0
+    fraud_verification = claim_data.get('fraud_verification', 'N/A')
 
-    for damage in policy_data['damage_evaluations']:
-        damage_parts.append({
-            "part": damage['part_damaged'],
-            "cost": f"${damage['cost']}",
-            "severity": damage['severity'].capitalize(),
-            "decision": damage['evaluation']['decision'],
-            "reason": damage['evaluation']['reason'],
-            "status": damage['evaluation']['status']
-        })
-        total_estimation += damage['cost']
-        if damage['evaluation']['approved']:
-            approved_amount += damage['cost']
+    if isinstance(policy_data, dict) and 'damage_evaluations' in policy_data:
+        # Extracting damage parts information
+        for damage in policy_data['damage_evaluations']:
+            damage_parts.append({
+                "part": damage['part_damaged'],
+                "cost": f"${damage['cost']}",
+                "severity": damage['severity'].capitalize(),
+                "decision": damage['evaluation']['decision'],
+                "reason": damage['evaluation']['reason'],
+                "status": damage['evaluation']['status']
+            })
+            total_estimation += damage['cost']
+            if damage['evaluation']['approved']:
+                approved_amount += damage['cost']
 
-    # Extracting photos (assuming vehicle photos are used)
-    photos = [
-        vehicle_data['vehiclePhotos']['front'],
-        vehicle_data['vehiclePhotos']['back'],
-        vehicle_data['vehiclePhotos']['left'],
-        vehicle_data['vehiclePhotos']['right']
-    ]
-    
-    print("damage parts", damage_parts)
+        # Extracting photos
+        photos = [
+            vehicle_data['vehiclePhotos']['front'],
+            vehicle_data['vehiclePhotos']['back'],
+            vehicle_data['vehiclePhotos']['left'],
+            vehicle_data['vehiclePhotos']['right']
+        ]
 
-    # Constructing the data dictionary
-    data = {
-        "vehicle_number_plate": vehicle_data.get('vehicleNumberPlate', 'N/A'),
-        "vehicle_vin": vehicle_data.get('vinNumber', 'N/A'),
-        "vehicle_make_model": vehicle_data.get('vehicleModel', 'N/A'),
-        "report_date": datetime.now().strftime("%d.%m.%Y"),
-        "fleet_manager": user_data.get('name', 'N/A'),
-        "driver_name": user_data.get('name', 'N/A'),  # Assuming the user is the driver
-        "driver_phone": user_data.get('mobileNumber', 'N/A'),
-        "incident_date": datetime.now().strftime("%d.%m.%Y - %H:%M"),  # Replace with actual incident date if available
-        "incident_location": "N/A",  # Replace with actual location if available
-        "weather": "N/A",  # Replace with actual weather if available
-        "damage_cause": "Rear-ended at a red light",  # Replace with actual cause if available
-        "damage_parts": damage_parts,
-        "incident_description": incident_summary,  # Replace with actual description if available
-        "photos": photos,
-        "total_estimation": f"${total_estimation}",
-        "approved_amount": f"${approved_amount}",
-        "status_summary": policy_data['overall_status'].capitalize(),
-       # "decision_with_reason": f"{policy_data['overall_status'].capitalize()} - {damage_parts[0]['reason']}"  # Example decision summary
-    }
+        # Constructing the data dictionary
+        data = {
+            "vehicle_number_plate": vehicle_data.get('vehicleNumberPlate', 'N/A'),
+            "vehicle_vin": vehicle_data.get('vinNumber', 'N/A'),
+            "vehicle_make_model": vehicle_data.get('vehicleModel', 'N/A'),
+            "report_date": datetime.now().strftime("%d.%m.%Y"),
+            "fleet_manager": user_data.get('name', 'N/A'),
+            "driver_name": user_data.get('name', 'N/A'),
+            "driver_phone": user_data.get('mobileNumber', 'N/A'),
+            "incident_date": datetime.now().strftime("%d.%m.%Y - %H:%M"),
+            "incident_location": "N/A",
+            "weather": "N/A",
+            "damage_cause": "Rear-ended at a red light",
+            "damage_parts": damage_parts,
+            "incident_description": incident_summary,
+            "photos": photos,
+            "total_estimation": f"${total_estimation}",
+            "approved_amount": f"${approved_amount}",
+            "status_summary": policy_data['overall_status'].capitalize(),
+            "model_verified": fraud_verification.get('model_verified', 'N/A'),
+            "face_verified": fraud_verification.get('face_verified', 'N/A'),
+            "license_verified": fraud_verification.get('license_verified', 'N/A'),
+            "insurance_verified": fraud_verification.get('insurance_verified', 'N/A'),
+            "number_plates_verified": fraud_verification.get('number_plates_verified', 'N/A'),
+            "prev_damage_verified": fraud_verification.get('prev_damage_verified', 'N/A'),
+            "vin_number_verified": fraud_verification.get('vin_number_verified', 'N/A'),
+            "color_verified": fraud_verification.get('color_verified', 'N/A'),
+            "location_verified": fraud_verification.get('location_verified', 'N/A'),
+            "fraud_verified": fraud_verification.get('fraud_verified', 'N/A'),
+            "signature_verified": fraud_verification.get('signature_verified', 'N/A'),
+            "fraud_verification_status": fraud_verification.get('fraud_verified', 'N/A')
+        }
+
+    else:
+        # Handle the case when the data is in a different format or the expected data is missing
+        data = {
+            "error": "Invalid policy data format or missing damage evaluations"
+        }
 
     return data

@@ -190,10 +190,37 @@ header {
 .damage-details {
   width: 100%;
   display: flex;
-  justify-content: space-between;
-  padding: 10px 0;
-  border-right: 1px solid #ddd;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px; /* Space between damage details sections */
+  /* background-color: #f9f9f9 */
+  border-radius: 8px; /* Rounded corners for a cleaner look */
+}
+
+.damage-details-item {
+  flex: 1 1 20%; /* Make sure the items are distributed evenly */
+  padding: 10px;
+  box-sizing: border-box;
+  min-width: 200px; /* Minimum width for each item to avoid squashing */
+  margin-right: 10px; /* Space between each item */
   border-left: 1px solid #ddd;
+}
+
+.damage-details-item:last-child {
+  margin-right: 0; /* Remove margin on the last item */
+  border-right: 1px solid #ddd; /* Add border to the last item */
+}
+
+.damage-details-item-label {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.damage-details-item-value {
+  color: #555;
+  font-size: 14px;
 }
 
 .damage-estimated {
@@ -215,19 +242,87 @@ header {
 .total-estimation {
   background-color: #dcdcdc;
   margin-top: 50px;
-  padding: 10px 0;
+  padding: 20px;
   display: flex;
-  justify-content: space-between;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  justify-content: space-between; /* Add space between items */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
 }
 
 .total-estimation-item {
   display: flex;
+  flex: 1 1 30%; /* Each item takes up 30% of the width */
   align-items: center;
-  gap: 10px;
-  padding: 10px 0;
+  gap: 15px;
+  margin-bottom: 15px; /* Space between items */
+  padding: 10px;
+  box-sizing: border-box;
 }
 
 .total-estimation-item-label {
   font-weight: bold;
   color: #003366;
+  flex-shrink: 0; /* Prevent the label from shrinking */
+}
+
+.total-estimation-item-value {
+  color: #555;
+  font-size: 16px;
+  text-align: right; /* Align values to the right for consistency */
+}
+
+@media (max-width: 768px) {
+  .total-estimation-item {
+    flex: 1 1 100%; /* On smaller screens, each item will take full width */
+    margin-right: 0;
+  }
+}
+
+.fraud-verification {
+  margin-bottom: 30px;
+}
+.fraud-verification table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.fraud-verification th,
+.fraud-verification td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+.fraud-verification th {
+  background-color: #f0f0f0;
+  color: #333;
+}
+.status {
+  font-weight: bold;
+  color: #010101;
+}
+.status.failed {
+  color: #000000;
+}
+
+.photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Add space between images */
+  justify-content: center; /* Center the images horizontally */
+  padding: 20px;
+}
+
+.photo-item {
+  width: 200px; /* Set a fixed width for each image container */
+  height: 200px; /* Set a fixed height */
+  overflow: hidden; /* Ensure images don't overflow */
+  border-radius: 8px; /* Optional: rounded corners for a clean look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.photo-item img {
+  width: 100%; /* Make sure the image fills the container */
+  height: 100%; /* Ensure the image takes up full height of the container */
+  object-fit: cover; /* Ensure the image scales to cover the container while maintaining its aspect ratio */
+  border-radius: 8px; /* Optional: match the container's rounded corners */
 }
