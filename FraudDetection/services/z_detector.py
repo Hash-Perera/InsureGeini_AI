@@ -173,8 +173,8 @@ async def excute_fraud_detector(claimId):
             similer_claims = await get_similar_claims(claimId, claim["vehicleId"], claim["damagedAreas"])
             similer_damageurl = await get_detections_images_similar_claims(similer_claims)
 
-            if len(similer_damageurl) > 3:
-                similer_damageurl = similer_damageurl[:3]
+            if len(similer_damageurl) > 2:
+                similer_damageurl = similer_damageurl[:2]
 
             similarity_score = damage_compare(current_damageurl, similer_damageurl)
 

@@ -9,6 +9,14 @@ app = FastAPI()
 class FeedbackRequest(BaseModel):
     feedback: str
 
+
+@app.get("/")
+async def healthcheck():
+    """
+    Healthcheck endpoint.
+    """
+    return {"status": "Sentiment Analysis API is up and running!"}
+
 @app.post("/feedback")
 async def predict_sentiment(request: FeedbackRequest):
     """
