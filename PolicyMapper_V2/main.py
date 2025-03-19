@@ -68,9 +68,9 @@ async def consume_and_forward():
                             print(f"⚠️ Policy Mapper failed for claimId: {claimId}")
                             continue
 
-                        new_policy_record = await create_policy(result, claimId)
+                        # new_policy_record = await create_policy(result, claimId)
                         
-                        print(f"📝 Inserted to fraud collection: {new_policy_record}")
+                        # print(f"📝 Inserted to fraud collection: {new_policy_record}")
                         
                         # Update the claim status to 'Policy Mapper Completed'
                         await update_claim_status_end(claimId)
@@ -227,7 +227,6 @@ async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
     await main(claim_id)
     return {"Hello": "World"}
 
-
-if __name__ == "__main__":
+if _name_ == "_main_":
     import uvicorn
     uvicorn.run(app, host="localhost", port=8000)

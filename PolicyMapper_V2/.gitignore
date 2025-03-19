@@ -4,3 +4,5 @@ temp/
 .env
 .DS_Store
 output/
+
+venv
