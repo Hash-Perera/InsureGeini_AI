@@ -117,12 +117,17 @@
     <div class="detail-row-title">
       <div class="label-title">Take photo evidence of vehicle damage</div>
     </div>
+    <div class="photo-gallery">
+      {% for photo in photos %}
+      <div class="photo-item">
+        <img src="file://{{ photo }}" alt="Damage Photo" />
+      </div>
+      {% endfor %}
+    </div>
     <div class="detail-row-title">
       <div class="label-title">Summary of the incident</div>
     </div>
-    {% for photo in photos %}
-    <img src="file://{{ photo }}" alt="Damage Photo" />
-    {% endfor %}
+
     <div class="value2">{{incident_summary}}</div>
 
     <div
