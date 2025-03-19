@@ -110,7 +110,7 @@ app = FastAPI(
     title="Claims Processing API",
     description="API for processing insurance claims",
     version="1.0.0",
-    #lifespan=lifespan
+    lifespan=lifespan
 )
 logger.info("Starting API")
 
