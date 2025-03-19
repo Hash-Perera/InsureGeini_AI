@@ -10,7 +10,7 @@
   <body>
     <header>
       <div class="logo">
-        <img src="logo.png" alt="Company Logo" />
+        <img src="templates/logo.png" alt="Company Logo" />
       </div>
       <div class="contact-info">
         <p><strong>InsureGeni</strong></p>
@@ -20,7 +20,7 @@
       </div>
     </header>
     <div class="report-title">
-      <h1>Vehicle Damage Report</h1>
+      <h1>Vehicle Decision Report</h1>
     </div>
     <div class="basic-container">
       <div class="basic-container-inside">
@@ -78,36 +78,38 @@
       <div class="header-item">Estimated Damage Cost</div>
       <div class="header-item">Status</div>
     </div>
+    {% for damage_part in damage_parts %}
     <div class="damage-details-container">
       <div class="damage-details">
         <div class="damage-details-item">
-          <div class="damage-details-item-label">Damage Type</div>
-          <div class="damage-details-item-value">{{damage_type}}</div>
+          <div class="damage-details-item-value">{{ damage_part.part }}</div>
         </div>
         <div class="damage-details-item">
-          <div class="damage-details-item-label">Desision</div>
-          <div class="damage-details-item-value">{{damage_type}}</div>
+          <div class="damage-details-item-value">
+            {{ damage_part.decision }}
+          </div>
         </div>
         <div class="damage-details-item">
-          <div class="damage-details-item-label">Serverity</div>
-          <div class="damage-details-item-value">{{damage_type}}</div>
+          <div class="damage-details-item-value">
+            {{ damage_part.severity }}
+          </div>
         </div>
         <div class="damage-details-item">
-          <div class="damage-details-item-label">Damage Details</div>
-          <div class="damage-details-item-value">{{damage_reason}}</div>
+          <div class="damage-details-item-value">{{ damage_part.reason }}</div>
         </div>
       </div>
       <div class="damage-estimated">
         <div class="damage-estimated-item">
-          <div class="damage-estimated-item-value">{{estimated_cost}}</div>
+          <div class="damage-estimated-item-value">{{ damage_part.cost }}</div>
         </div>
       </div>
       <div class="damage-status">
         <div class="damage-status-item">
-          <div class="damage-status-item-label">{{Status}}</div>
+          <div class="damage-status-item-label">{{ damage_part.status }}</div>
         </div>
       </div>
     </div>
+    {% endfor %}
 
     <!-- Total estimation -->
     <div class="total-estimation">
@@ -120,17 +122,13 @@
         <div class="total-estimation-item-value">{{status_summary}}</div>
       </div>
       <div class="total-estimation-item">
-        <div class="total-estimation-item-label">User maximum limit</div>
-        <div class="total-estimation-item-value">{{user_maximum_limit}}</div>
-      </div>
-      <div class="total-estimation-item">
         <div class="total-estimation-item-label">Approved Amount</div>
         <div class="total-estimation-item-value">{{approved_amount}}</div>
       </div>
     </div>
 
     <!-- Decision -->
-    <div class="detail-row-title">
+    <!-- <div class="detail-row-title">
       <div class="label-title">Decision Summary</div>
     </div>
     <div class="decision-summary">
@@ -138,7 +136,7 @@
         <div class="decision-summary-item-label">Decision</div>
         <div class="decision-summary-item-value">{{decision_with_reason}}</div>
       </div>
-    </div>
+    </div> -->
 
     <div
       style="

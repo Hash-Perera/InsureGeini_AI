@@ -1,10 +1,10 @@
-from bson import ObjectId
 from core.db import report_collection
 from datetime import datetime
+from bson import ObjectId
 
 async def create_policy(result, claim_id):
     policy_record = {
-        "claim_id": claim_id,
+        "claimId": ObjectId(claim_id),
         "audioToTextConvertedContext": result.get("audioToTextConvertedContext"),
         "status": result.get("status"),
         "estimation_requested": result.get("estimation_requested"),

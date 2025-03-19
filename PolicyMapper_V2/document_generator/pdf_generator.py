@@ -10,7 +10,7 @@ class PDFGenerator:
         self.output_folder = output_folder
         os.makedirs(output_folder, exist_ok=True)
 
-    def generate_pdf(self, data, output_filename):
+    def generate_pdf(self, data, output_filename, template_name):
         """Generates a PDF report and includes external CSS styling."""
         
         # Ensure image paths are absolute
@@ -18,7 +18,7 @@ class PDFGenerator:
             data["photos"][i] = os.path.abspath(img)
 
         # Render the HTML template
-        template = self.env.get_template("report_template.html")
+        template = self.env.get_template(template_name)
         html_content = template.render(data)
 
         # Define paths
@@ -30,7 +30,7 @@ class PDFGenerator:
         
         print(f"✅ PDF Generated: {pdf_path}")
 
-# Example Usage
+# Example Usage of the PDFGenerator class
 if __name__ == "__main__":
     sample_data = {
     "vehicle_number_plate": "NTJ 455",

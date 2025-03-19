@@ -2,6 +2,7 @@ from fastapi import FastAPI
 from audio.audio_pre_processing import process_audio
 from audio.speech_to_text import transcribe_audio
 from crud.claim import get_claim
+from models.policy_mapper import evaluate_claim_using_llma
 from models.summary_generator import generate_summary
 from helpers.util import download_audio_file, extract_metadata_from_audio_file_url, upload_pdf_to_s3
 import aio_pika
@@ -18,6 +19,7 @@ from crud.vehicle import get_vehicle
 from crud.damage_detection import get_damage_detection
 from document_generator.data_collector import collect_data
 from document_generator.pdf_generator import PDFGenerator
+from bson import ObjectId
 
 load_dotenv()
 
@@ -101,7 +103,6 @@ async def lifespan(app: FastAPI):
     # Cleanup if necessary (optional)
     task.cancel()
 from core.logger import Logger
-from bson import ObjectId
 
 logger = Logger()
 
@@ -113,6 +114,10 @@ app = FastAPI(
 )
 logger.info("Starting API")
 
+def convert_objectid(obj):
+    if isinstance(obj, ObjectId):
+        return str(obj)
+    raise TypeError(f'Object of type {obj.__class__.__name__} is not JSON serializable')
 
 async def main(claim_id: str | ObjectId) -> dict:
     if not ObjectId.is_valid(claim_id):
@@ -153,20 +158,23 @@ async def main(claim_id: str | ObjectId) -> dict:
     claim_data = claim_record
     claim_data['audio_to_text'] = transcribed_text
     user_data = await get_user(claim_record.get("userId"))
-    vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
-    damage_detection_data = await get_damage_detection(claim_record.get("_id"))
 
-    incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data)
-
-
+    print("\n")
     print(f"User data: {user_data}")
+    print("\n")
+
+    vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
+
+    print("\n")
     print(f"Vehicle data: {vehicle_data}")
-    print(f"Damage detection data: {damage_detection_data}")
-    print(f"Claim data: {claim_data}")
+    print("\n")
+
+    damage_detection_data = await get_damage_detection(claim_record.get("_id"))
+    incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data, transcribed_text)
   
     data = collect_data(user_data, vehicle_data, damage_detection_data, claim_data, incident_summary)
     pdf_generator = PDFGenerator()
-    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf")
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf", "report_template.html")
 
     # upload the pdf to s3
     if await upload_pdf_to_s3(
@@ -178,11 +186,41 @@ async def main(claim_id: str | ObjectId) -> dict:
         logger.error(f"Failed to upload PDF to s3")
         return {"error": "Failed to upload PDF to s3"}
     
+    result = evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data)
+    print("\n")
+    print(json.dumps(result, indent=4, default=convert_objectid))
+    print("\n")
 
-    
 
+    data = collect_data(user_data, vehicle_data, result, incident_summary)
+    pdf_generator = PDFGenerator()
+    pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf", "decision_report.html")
+
+    # upload the pdf to s3
+    if await upload_pdf_to_s3(
+        f"temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf",
+        f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf"
+    ):
+        logger.info(f"PDF uploaded to s3 successfully")
+    else:
+        logger.error(f"Failed to upload PDF to s3")
+        
+        
+        
+        
+    final_result = {
+            "audioToTextConvertedContext": transcribed_text,
+            "status": result.get('overall_status'),
+            "estimation_requested": result.get('total_cost'),
+            "estimation_approved": result.get('approved_costs'),
+            "reason": "Rear-ended at a red light",
+            "incidentReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf",
+            "decisionReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf"
+    }
+        
+    new_policy_record = await create_policy(result=final_result, claim_id=claim_id)
+    print(f"📝 Inserted to fraud collection: {new_policy_record}")
  
-
 @app.get("/", response_model=None)
 async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
     logger.info(f"Received request for claim_id: {claim_id}")
