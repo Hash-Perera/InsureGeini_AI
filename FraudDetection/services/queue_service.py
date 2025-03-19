@@ -66,7 +66,11 @@ EXCHANGE_NAME = os.getenv("EXCHANGE_NAME")
 
 async def consume_and_forward():
     try:
-        connection = await aio_pika.connect_robust(RABBITMQ_URL)
+        connection = await aio_pika.connect_robust(
+            RABBITMQ_URL, reconnect_interval=5, heartbeat=600 
+        )
+        asyncio.create_task(keep_rabbitmq_alive(connection))
+
         async with connection:
             channel = await connection.channel()
             fraud_queue = await channel.declare_queue("fraud_detection_queue", durable=True)
@@ -111,10 +115,32 @@ async def consume_and_forward():
 
                     except Exception as e:
                         print(f"❌ Error processing message: {e}")
-                        continue  # Ensure the loop continues even if an error occurs
+                        continue 
 
     except Exception as e:
         print(f"❌ Critical Error in consume_and_forward: {e}")
 
 async def start_fraud_consumer():
     asyncio.create_task(consume_and_forward())
+
+
+# Keep the RabbitMQ connection alive
+async def keep_rabbitmq_alive(connection):
+    """ Periodically check and keep the RabbitMQ connection alive """
+    while True:
+        try:
+            if not connection or connection.is_closed:
+                print("🔴 RabbitMQ connection lost. Reconnecting...")
+                connection = await aio_pika.connect_robust(
+                    RABBITMQ_URL, reconnect_interval=5, heartbeat=120
+                )
+                print("🟢 RabbitMQ connection restored.")
+
+            # Send a heartbeat or check connection readiness
+            await connection.ready()
+            print("✅ RabbitMQ connection is active.")
+
+        except Exception as e:
+            print(f"❌ RabbitMQ connection error: {e}")
+
+        await asyncio.sleep(30)

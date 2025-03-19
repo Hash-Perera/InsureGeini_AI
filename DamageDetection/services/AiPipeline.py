@@ -6,8 +6,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from tabulate import tabulate
-from utils.RuleEngine import evaluate_rules
-from utils.ClaimEstimator import estimate_claim
+from services.utils.NewRuleEngine import evaluate_rules
+from services.utils.ClaimEstimator import estimate_claim
 
 class AiPipeline:
     
@@ -17,8 +17,8 @@ class AiPipeline:
         self.preprocessor = preprocessor
         self.postprocessor = postprocessor
 
-    
-    def process_image(self,image_path):
+    #update to receive obd codes
+    async def process_image(self,image_path,obd_codes,claimId):
         #preprocess
         preprocessed_image = self.preprocessor.preprocess(image_path)
 
@@ -33,22 +33,8 @@ class AiPipeline:
             if model_name == "VggClassifire":
                 results[model_name] = model.predict(preprocessed_image["tensorflow"])
                 cropped_images = self.preprocessor.preprocess_cropped_images(image_path, results["YoloV8Detector"])
-                # ###################################################################
-                #  # Create a subplot for each cropped image
-                # fig, axes = plt.subplots(1, len(cropped_images), figsize=(15, 5))
-
-                # # Ensure axes is iterable even if only one image is detected
-                # if len(cropped_images) == 1:
-                #     axes = [axes]
-
-                # # Display each cropped image with its part label
-                # for ax, (_, part_label, cropped_part) in zip(axes, cropped_images):
-                #     ax.imshow(cropped_part)
-                #     ax.set_title(f"Part: {part_label}")
-                #     ax.axis("off")
-
-                # plt.show()
-                # ####################################################################
+                #uploading to s3
+                cropped_images_s3 = await self.preprocessor.upload_cropped_images(cropped_images,claimId)
                 severity_results = []
                 count = 0
                 for image_array, part_label, cropped_part in cropped_images:
@@ -67,10 +53,10 @@ class AiPipeline:
         postprocessed_results = self.postprocessor.match_damage_to_part(results["YoloV8Detector"],results["YoloV8Segmenter"])
         
         #Final result
-        final_result = self.postprocessor.create_vector(results["PartSeverity"],postprocessed_results)
+        final_result = self.postprocessor.create_vector(results["PartSeverity"],postprocessed_results,cropped_images_s3)
 
         #To be changed to add the internal damages properly
-        unified_vector = self.postprocessor.create_unified_vector(final_result)
+        unified_vector = await self.postprocessor.create_unified_vector(final_result,obd_codes)
 
         # print(unified_vector)
 

@@ -1,6 +1,6 @@
-from inference.YoloV8Detector import YoloV8Detector
-from inference.YoloV8Segmenter import YoloV8Segmenter
-from inference.VggClassifire import VggClassifire
+from services.inference.YoloV8Detector import YoloV8Detector
+from services.inference.YoloV8Segmenter import YoloV8Segmenter
+from services.inference.VggClassifire import VggClassifire
 
 class ModelFactory:
 

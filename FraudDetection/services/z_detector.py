@@ -1,6 +1,6 @@
 from fastapi import  HTTPException
 from fastapi.responses import JSONResponse
-from database import claim_collection, verify_connection
+from database import claim_collection, get_detections_images_current_claim, get_similar_claims,get_detections_images_similar_claims, verify_connection
 from bson import ObjectId
 from services.s_damage_compare import damage_compare
 from services.s_driving_licence import face_compare
@@ -73,6 +73,7 @@ async def excute_fraud_detector(claimId):
 
         try:
             #! Read Number Plate
+            print(claim["frontLicencePlate"]);
             readNumberPlateResult = extract_number_plates(claim["frontLicencePlate"])
         except Exception as e:
             readNumberPlateResult = {
@@ -102,69 +103,88 @@ async def excute_fraud_detector(claimId):
             }
 
 
-        #! Compare Damage Images
-        try:
+        # #! Compare Damage Images
+        # try:
 
-            # #######################################################################################
+        #     # #######################################################################################
 
-            # # Ensure vehicleId is an ObjectId before querying
-            # vehicle_id = claim["vehicleId"]
-            # if isinstance(vehicle_id, dict) and "$oid" in vehicle_id:
-            #     vehicle_id = ObjectId(vehicle_id["$oid"])
-            # elif isinstance(vehicle_id, str):
-            #     vehicle_id = ObjectId(vehicle_id)
+        #     # # Ensure vehicleId is an ObjectId before querying
+        #     # vehicle_id = claim["vehicleId"]
+        #     # if isinstance(vehicle_id, dict) and "$oid" in vehicle_id:
+        #     #     vehicle_id = ObjectId(vehicle_id["$oid"])
+        #     # elif isinstance(vehicle_id, str):
+        #     #     vehicle_id = ObjectId(vehicle_id)
 
-            # # Ensure claimId is an ObjectId before excluding it
-            # current_claim_id = claim["_id"]
-            # if isinstance(current_claim_id, dict) and "$oid" in current_claim_id:
-            #     current_claim_id = ObjectId(current_claim_id["$oid"])
-            # elif isinstance(current_claim_id, str):
-            #     current_claim_id = ObjectId(current_claim_id)
+        #     # # Ensure claimId is an ObjectId before excluding it
+        #     # current_claim_id = claim["_id"]
+        #     # if isinstance(current_claim_id, dict) and "$oid" in current_claim_id:
+        #     #     current_claim_id = ObjectId(current_claim_id["$oid"])
+        #     # elif isinstance(current_claim_id, str):
+        #     #     current_claim_id = ObjectId(current_claim_id)
 
-            # # Find the claims that have damage Areas in the current claim
-            # current_damage_areas = claim["damagedAreas"] or []
-            # query = {
-            #     "damagedAreas": {
-            #         "$in": current_damage_areas  
-            #     },
-            #     "vehicleId" : vehicle_id,
-            #     "_id": { "$ne": current_claim_id }
-            # }
+        #     # # Find the claims that have damage Areas in the current claim
+        #     # current_damage_areas = claim["damagedAreas"] or []
+        #     # query = {
+        #     #     "damagedAreas": {
+        #     #         "$in": current_damage_areas  
+        #     #     },
+        #     #     "vehicleId" : vehicle_id,
+        #     #     "_id": { "$ne": current_claim_id }
+        #     # }
 
             
-            # # Fetch claims with similar damage areas and same vehicleId
-            # similar_claims = await claim_collection.find(query, {"_id": 1, "damagedAreas": 1, "damageImages": 1}).to_list(length=None)
-            # # Convert BSON ObjectIds to JSON format
-            # # similar_claims_formatted = []
-            # # if len(similar_claims) > 0: 
-            # #     similar_claims_formatted = [convert_bson_to_json(claim) for claim in similar_claims]
+        #     # # Fetch claims with similar damage areas and same vehicleId
+        #     # similar_claims = await claim_collection.find(query, {"_id": 1, "damagedAreas": 1, "damageImages": 1}).to_list(length=None)
+        #     # # Convert BSON ObjectIds to JSON format
+        #     # # similar_claims_formatted = []
+        #     # # if len(similar_claims) > 0: 
+        #     # #     similar_claims_formatted = [convert_bson_to_json(claim) for claim in similar_claims]
 
             
         
             
-            # # Push Damage images of all similar claims to a new array
-            # similar_damage_images = []
-            # for claim in similar_claims:
-            #     similar_damage_images.extend(claim["damageImages"])
+        #     # # Push Damage images of all similar claims to a new array
+        #     # similar_damage_images = []
+        #     # for claim in similar_claims:
+        #     #     similar_damage_images.extend(claim["damageImages"])
 
-            # # Pass Similer images list to compare images function
-            # ###########################################################################################
+        #     # # Pass Similer images list to compare images function
+        #     # ###########################################################################################
 
-            #! compare images
-            url_set_1 = claim["damageImages"]
+        #     #! compare images
+        #     url_set_1 = claim["damageImages"]
 
-            url_set_2 = [
-                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
-                'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
-            ]
-            similarity_score = damage_compare(url_set_1, url_set_2)
+        #     url_set_2 = [
+        #         'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/DC_1.jpg',
+        #         'https://insure-geini-s3.s3.us-east-1.amazonaws.com/6748472eae0fb7cdbf7190fa/CLM-1/NDC_1.jpg',
+        #     ]
+        #     similarity_score = damage_compare(url_set_1, url_set_2)
 
+        # except Exception as e:
+        #     similarity_score =   {
+        #         "status": False,
+        #         "error": str(e),
+        #         "results": None
+        #     }
+
+        try:
+            
+            current_damageurl = await get_detections_images_current_claim(claimId)
+            similer_claims = await get_similar_claims(claimId, claim["vehicleId"], claim["damagedAreas"])
+            similer_damageurl = await get_detections_images_similar_claims(similer_claims)
+
+            if len(similer_damageurl) > 2:
+                similer_damageurl = similer_damageurl[:2]
+
+            similarity_score = damage_compare(current_damageurl, similer_damageurl)
+
+           
         except Exception as e:
             similarity_score =   {
                 "status": False,
                 "error": str(e),
                 "results": None
-            }
+            }    
 
 
         #? Return the results
@@ -510,7 +530,7 @@ def extract_number_plates(image_url):
 
         return {
             "status": True, 
-            "error":  str(e), 
+            "error":  None, 
             "number_plate": extracted_text
         }
 
@@ -663,8 +683,6 @@ def exraction_color(image_url):
         extracted_text = "N/A"
         if messages.data and messages.data[0].content:
             extracted_text = messages.data[0].content[0].text.value  # Fix: Access .text directly
-
-        print(messages.data[0].content)
 
         return {
             "status": True, 

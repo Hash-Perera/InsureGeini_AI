@@ -1,4 +1,5 @@
-from utils.RuleEngine import evaluate_rules
+#from utils.RuleEngine import evaluate_rules
+from services.utils.NewRuleEngine import evaluate_rules
 
 def estimate_claim(unified_vector):
     #Temporary datastore for part prices
@@ -48,6 +49,7 @@ def estimate_claim(unified_vector):
     total_cost=0
 
     for damage in unified_vector:
+        # descision = evaluate_rules(damage)
         descision = evaluate_rules(damage)
         
 
