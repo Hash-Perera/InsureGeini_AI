@@ -53,7 +53,7 @@ async def check():
 #         .build()
 #     )
 
-# @app.post("/predict")
+@app.post("/predict")
 async def predict(claimId):
     await damage_Detector(claimId)
     print(f"🔍 Processing damage detection for: {claimId}")
