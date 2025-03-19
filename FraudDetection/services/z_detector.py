@@ -168,10 +168,13 @@ async def excute_fraud_detector(claimId):
         #     }
 
         try:
-            #! Verify the connection
+            
             current_damageurl = await get_detections_images_current_claim(claimId)
             similer_claims = await get_similar_claims(claimId, claim["vehicleId"], claim["damagedAreas"])
             similer_damageurl = await get_detections_images_similar_claims(similer_claims)
+
+            if len(similer_damageurl) > 3:
+                similer_damageurl = similer_damageurl[:3]
 
             similarity_score = damage_compare(current_damageurl, similer_damageurl)
 
@@ -680,8 +683,6 @@ def exraction_color(image_url):
         extracted_text = "N/A"
         if messages.data and messages.data[0].content:
             extracted_text = messages.data[0].content[0].text.value  # Fix: Access .text directly
-
-        print(messages.data[0].content)
 
         return {
             "status": True, 

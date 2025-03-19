@@ -6,8 +6,8 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from tabulate import tabulate
-from utils.NewRuleEngine import evaluate_rules
-from utils.ClaimEstimator import estimate_claim
+from services.utils.NewRuleEngine import evaluate_rules
+from services.utils.ClaimEstimator import estimate_claim
 
 class AiPipeline:
     

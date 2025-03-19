@@ -66,7 +66,9 @@ EXCHANGE_NAME = os.getenv("EXCHANGE_NAME")
 
 async def consume_and_forward():
     try:
-        connection = await aio_pika.connect_robust(RABBITMQ_URL)
+        connection = await aio_pika.connect_robust(
+            RABBITMQ_URL, reconnect_interval=5, heartbeat=120
+        )
         async with connection:
             channel = await connection.channel()
             fraud_queue = await channel.declare_queue("fraud_detection_queue", durable=True)
@@ -111,7 +113,7 @@ async def consume_and_forward():
 
                     except Exception as e:
                         print(f"❌ Error processing message: {e}")
-                        continue  # Ensure the loop continues even if an error occurs
+                        continue 
 
     except Exception as e:
         print(f"❌ Critical Error in consume_and_forward: {e}")
