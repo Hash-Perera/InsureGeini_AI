@@ -3,6 +3,7 @@ from datetime import datetime
 from bson import ObjectId
 
 async def create_policy(result, claim_id):
+    print(result.get("evaluation"))
     policy_record = {
         "claimId": ObjectId(claim_id),
         "audioToTextConvertedContext": result.get("audioToTextConvertedContext"),
@@ -12,6 +13,7 @@ async def create_policy(result, claim_id):
         "reason": result.get("reason"),
         "incidentReport": result.get("incidentReport"),
         "decisionReport": result.get("decisionReport"),
+        "evaluation": result.get("evaluation"),
         "createdAt": datetime.now(),
     }
     

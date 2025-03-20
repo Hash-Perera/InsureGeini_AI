@@ -162,10 +162,18 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
         obd_code = damage.get('obd_code', False)
         internal_damage = damage.get('internal', 'No internal damage reported')
         flag = damage.get('flag', 'No flags')
+        fraud_verification = claim_data.get('fraud_verification', {})
+        print("FRAUD VERIFICATION" ,fraud_verification)
+        
+        #fraud_result = all(value.lower() == 'true' for value in fraud_verification.values())
+        fraud_result = all(fraud_verification.values())
+        
+        
+        print("FRAUD VERIFICATION", fraud_result)
 
         prompt = f"""
         You are an insurance claims evaluator. Given the claim details, policy coverage, and vehicle details below, determine whether the claim should be approved or rejected. Provide the reasoning for your decision. 
-        Ensure that the decision is always valid, either "approved" or "rejected". Do not leave any decision ambiguous. Consider the severity of the damage, the policy exclusions, and the claim amount .
+        Ensure that the decision is always valid, either "approved" or "rejected". Do not leave any decision ambiguous. Consider the severity of the damage, the policy exclusions, and the claim amount. Consider if fraud result is false reject the claim giving the reason "Fraud detected. One or more verifications failed." .
 
         CLAIM DETAILS:
         - Claim ID: {claim_data.get('insuranceId', 'Unknown')}
@@ -181,7 +189,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
         - OBD Code: {obd_code}
         - Internal Damage: {internal_damage}
         - Flag: {flag}
-
+        
         VEHICLE DETAILS:
         - Vehicle Model: {vehicle_model}
         - Vehicle Color: {vehicle_color}
@@ -191,13 +199,13 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
 
         INSURANCE POLICY COVERAGE:
         {json.dumps(rag_details, indent=2)}
-
-        Based on the above information, return a JSON response with the following fields:
+    
+        Based on the above information, return a JSON response with the following fields":
         - "status": "approved" or "rejected" (must always be valid)
         - "decision": "Repair" or "Replace"
-        - "reason": A valid, reasoned explanation for your decision
-        - "cost": The claim cost
-        - "approved": Boolean indicating if the claim is approved
+        - "reason": A valid, reasoned explanation for your decision "
+        - "cost": The claim cost"
+        - "approved": Boolean indicating"
         """
 
         response = client.chat.completions.create(
@@ -222,6 +230,13 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
             result = json.loads(output)
             if 'status' not in result or 'decision' not in result or 'reason' not in result:
                 raise ValueError("Missing required fields in the response.")
+            if fraud_result == False:
+                print("Fraud detected. One or more verifications failed.")
+                result['status'] = "rejected"
+                result['decision'] = "rejected"
+                result['reason'] = "Fraud detected. One or more verifications failed."
+                result['cost'] = 0
+                result['approved'] = False
         except (json.JSONDecodeError, ValueError):
             result = {
                 "status": "rejected",
@@ -230,6 +245,7 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
                 "cost": cost,
                 "approved": False
             }
+            
 
         if 'approved' not in result:
             result['approved'] = result['status'] == "approved"
@@ -255,12 +271,14 @@ def evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data) -
     approved_costs = sum(result['cost'] for result in detailed_results if result['evaluation']['approved'])
     #overall_status = "approved" if all(result['evaluation']['approved'] for result in detailed_results) else "rejected"
     overall_status = "Rejected" if all(not result['evaluation']['approved'] for result in detailed_results) else "Approved"
+    reason = "All verifications passed." if fraud_result else "Fraud detected. One or more verifications failed."
 
     return {
         "overall_status": overall_status,
         "total_cost": total_cost,
         "damage_evaluations": detailed_results,
-        "approved_costs": approved_costs
+        "approved_costs": approved_costs,
+        "reason": reason
     }
 
 
@@ -294,7 +312,19 @@ claim_data = {
     "locationAddress": "WV97+629 Colombo, Sri Lanka",
     "weather": "Clouds, scattered clouds",
     "audio": "https://example.com/audio.mp3",
-    "audio_to_text": "I was driving when another car hit me from the side."
+    "audio_to_text": "I was driving when another car hit me from the side.",
+    "fraud_verification": {
+    "model_verified": "true",
+    "face_verified": "true",
+    "license_verified": "true",
+    "insurance_verified": "true",
+    "number_plates_verified": "true",
+    "prev_damage_verified": "true",
+    "vin_number_verified": "true",
+    "color_verified": "true",
+    "location_verified": "true",
+    "fraud_verified": "true"
+  }
 }
 
 damage_detection_data = [
@@ -364,6 +394,6 @@ vehicle_data = {
     "insurancePolicy": "Comprehensive Insurance"
 }
 
-# # Example usage
+#Example usage
 #result = evaluate_claim_using_llma(claim_data, damage_detection_data, vehicle_data)
 #print(json.dumps(result, indent=4))

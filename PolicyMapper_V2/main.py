@@ -110,7 +110,7 @@ app = FastAPI(
     title="Claims Processing API",
     description="API for processing insurance claims",
     version="1.0.0",
-   # lifespan=lifespan
+    lifespan=lifespan
 )
 logger.info("Starting API")
 
@@ -159,15 +159,9 @@ async def main(claim_id: str | ObjectId) -> dict:
     claim_data['audio_to_text'] = transcribed_text
     user_data = await get_user(claim_record.get("userId"))
 
-    print("\n")
-    print(f"User data: {user_data}")
-    print("\n")
 
     vehicle_data = await get_vehicle(claim_record.get("vehicleId"))
 
-    print("\n")
-    print(f"Vehicle data: {vehicle_data}")
-    print("\n")
 
     damage_detection_data = await get_damage_detection(claim_record.get("_id"))
     incident_summary = generate_summary(user_data, vehicle_data, damage_detection_data, claim_data, transcribed_text)
@@ -190,13 +184,17 @@ async def main(claim_id: str | ObjectId) -> dict:
     print("\n")
     print(json.dumps(result, indent=4, default=convert_objectid))
     print("\n")
+    
+    print("RESULT", result)
 
 
-    data = collect_data(user_data, vehicle_data, result, incident_summary)
+    data = collect_data(user_data, vehicle_data, result, incident_summary, claim_data)
+    
+    print("DATA for decision report", data)
     pdf_generator = PDFGenerator()
     pdf_generator.generate_pdf(data, f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf", "decision_report.html")
 
-    # upload the pdf to s3
+    #upload the pdf to s3
     if await upload_pdf_to_s3(
         f"temp/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf",
         f"{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf"
@@ -205,21 +203,25 @@ async def main(claim_id: str | ObjectId) -> dict:
     else:
         logger.error(f"Failed to upload PDF to s3")
         
-        
-        
+    print("\n")
+    print("\n")
+    print(result)
         
     final_result = {
             "audioToTextConvertedContext": transcribed_text,
             "status": result.get('overall_status'),
             "estimation_requested": result.get('total_cost'),
             "estimation_approved": result.get('approved_costs'),
-            "reason": "Rear-ended at a red light",
+            "reason": result.get('reason'),
             "incidentReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/vehicle_damage_report.pdf",
-            "decisionReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf"
+            "decisionReport": f"https://insure-geini-s3.s3.us-east-1.amazonaws.com/{audio_file_metadata.get('user_id')}/{audio_file_metadata.get('claim_number')}/decision_report.pdf",
+            "evaluation" : result.get("damage_evaluations")
     }
         
     new_policy_record = await create_policy(result=final_result, claim_id=claim_id)
-    print(f"📝 Inserted to fraud collection: {new_policy_record}")
+    print(f"📝 Inserted to report collection: {new_policy_record}")
+    
+    return final_result
  
 @app.get("/", response_model=None)
 async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
@@ -227,6 +229,6 @@ async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
     await main(claim_id)
     return {"Hello": "World"}
 
-if _name_ == "_main_":
+if __name__ == "_main_":
     import uvicorn
     uvicorn.run(app, host="localhost", port=8000)

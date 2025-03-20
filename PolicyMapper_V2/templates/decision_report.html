@@ -82,22 +82,27 @@
     <div class="damage-details-container">
       <div class="damage-details">
         <div class="damage-details-item">
+          <div class="damage-details-item-label">Part:</div>
           <div class="damage-details-item-value">{{ damage_part.part }}</div>
         </div>
         <div class="damage-details-item">
+          <div class="damage-details-item-label">Decision:</div>
           <div class="damage-details-item-value">
             {{ damage_part.decision }}
           </div>
         </div>
         <div class="damage-details-item">
+          <div class="damage-details-item-label">Severity:</div>
           <div class="damage-details-item-value">
             {{ damage_part.severity }}
           </div>
         </div>
         <div class="damage-details-item">
+          <div class="damage-details-item-label">Reason:</div>
           <div class="damage-details-item-value">{{ damage_part.reason }}</div>
         </div>
       </div>
+
       <div class="damage-estimated">
         <div class="damage-estimated-item">
           <div class="damage-estimated-item-value">{{ damage_part.cost }}</div>
@@ -110,6 +115,57 @@
       </div>
     </div>
     {% endfor %}
+
+    <!-- Fraud verification -->
+    <div class="fraud-verification">
+      <h3>Fraud Verification Status</h3>
+      <table>
+        <tr>
+          <th>Verification Item</th>
+          <th>Status</th>
+        </tr>
+        <tr>
+          <td>Model Verified</td>
+          <td class="status failed">{{model_verified}}</td>
+        </tr>
+        <tr>
+          <td>Face Verified</td>
+          <td class="status">{{face_verified}}</td>
+        </tr>
+        <tr>
+          <td>License Verified</td>
+          <td class="status">{{license_verified}}</td>
+        </tr>
+        <tr>
+          <td>Insurance Verified</td>
+          <td class="status">{{insurance_verified}}</td>
+        </tr>
+        <tr>
+          <td>Number Plates Verified</td>
+          <td class="status">{{number_plates_verified}}</td>
+        </tr>
+        <tr>
+          <td>Previous Damage Verified</td>
+          <td class="status">{{prev_damage_verified}}</td>
+        </tr>
+        <tr>
+          <td>VIN Number Verified</td>
+          <td class="status">{{vin_number_verified}}</td>
+        </tr>
+        <tr>
+          <td>Color Verified</td>
+          <td class="status">{{color_verified}}</td>
+        </tr>
+        <tr>
+          <td>Location Verified</td>
+          <td class="status">{{location_verified}}</td>
+        </tr>
+        <tr>
+          <td>Fraud Verified</td>
+          <td class="status">{{fraud_verification_status}}</td>
+        </tr>
+      </table>
+    </div>
 
     <!-- Total estimation -->
     <div class="total-estimation">
