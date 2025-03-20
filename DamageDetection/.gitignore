@@ -1,0 +1,11 @@
+Vgg16Classification.h5
+.venv/
+services/.env
+
+.env
+
+AI_Modles
+
+__pycache__/
+
+venv

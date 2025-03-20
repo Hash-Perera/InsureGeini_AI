@@ -1,0 +1,328 @@
+body {
+  font-family: Arial, sans-serif;
+  width: 100%;
+}
+h1,
+h2 {
+  color: #111212;
+}
+.section {
+  margin-bottom: 20px;
+}
+.data {
+  margin-left: 20px;
+}
+.signature {
+  margin-top: 40px;
+}
+.footer {
+  margin-top: 50px;
+  font-size: 12px;
+  text-align: center;
+  color: #666;
+}
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+img {
+  max-width: 300px;
+  height: auto;
+  display: block;
+  margin: 10px 0;
+}
+header {
+  background-color: #000000;
+  color: white;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  width: 100%;
+}
+.logo img {
+  mix-blend-mode: multiply;
+  width: 120px;
+}
+.address {
+  font-size: 14px;
+  line-height: 1.5;
+}
+.contact-info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+}
+.contact-info p {
+  margin: 0;
+}
+
+.report-title {
+  text-align: start;
+  font-size: 17px;
+}
+
+.sub-header {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+}
+
+.basic-container {
+  display: flex;
+  justify-content: space-between;
+  gap: 5px;
+  align-items: center;
+}
+
+.basic-container-inside {
+  display: flex;
+  flex-direction: column;
+}
+.basic-span {
+  text-align: start;
+  font-size: 14px;
+  color: #767676;
+}
+.basic-status {
+  color: green;
+  font-size: small;
+}
+
+.report-header {
+  margin-top: 18px;
+  background-color: #dcdcdc;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px;
+}
+
+.header-item {
+  font-weight: bold;
+  color: #333;
+}
+
+.report-details {
+}
+
+.detail-row {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  margin-left: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.label {
+  font-weight: bold;
+  color: #003366;
+}
+.label-title {
+  margin-top: 10px;
+  font-weight: bold;
+  font-size: 24px;
+  color: #003366;
+}
+.detail-row-title {
+  width: 100%;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.value {
+  color: #555;
+  padding-right: 10px;
+}
+.value2 {
+  color: #555;
+  padding: 10px 0;
+}
+
+.detail-row-status {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  margin-left: 10px;
+  border-bottom: 1px solid #ddd;
+}
+.label-status {
+  padding: 10px 0;
+  font-weight: bold;
+  color: #003366;
+}
+.value-status {
+  color: #080808;
+  font-weight: semibold;
+  background-color: orange;
+  height: 45px;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+.value-status-red {
+  color: #ffffff;
+  font-weight: semibold;
+  background-color: red;
+  height: 45px;
+  width: 140px;
+  display: flex;
+  align-items: center;
+  text-align: center;
+  justify-content: center;
+}
+
+.damage-details-container {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.damage-details {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  padding: 10px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px; /* Space between damage details sections */
+  /* background-color: #f9f9f9 */
+  border-radius: 8px; /* Rounded corners for a cleaner look */
+}
+
+.damage-details-item {
+  flex: 1 1 20%; /* Make sure the items are distributed evenly */
+  padding: 10px;
+  box-sizing: border-box;
+  min-width: 200px; /* Minimum width for each item to avoid squashing */
+  margin-right: 10px; /* Space between each item */
+  border-left: 1px solid #ddd;
+}
+
+.damage-details-item:last-child {
+  margin-right: 0; /* Remove margin on the last item */
+  border-right: 1px solid #ddd; /* Add border to the last item */
+}
+
+.damage-details-item-label {
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 5px;
+}
+
+.damage-details-item-value {
+  color: #555;
+  font-size: 14px;
+}
+
+.damage-estimated {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.damage-status {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  padding: 10px 0;
+  border-right: 1px solid #ddd;
+}
+
+.total-estimation {
+  background-color: #dcdcdc;
+  margin-top: 50px;
+  padding: 20px;
+  display: flex;
+  flex-wrap: wrap; /* Allow items to wrap on smaller screens */
+  justify-content: space-between; /* Add space between items */
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.total-estimation-item {
+  display: flex;
+  flex: 1 1 30%; /* Each item takes up 30% of the width */
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px; /* Space between items */
+  padding: 10px;
+  box-sizing: border-box;
+}
+
+.total-estimation-item-label {
+  font-weight: bold;
+  color: #003366;
+  flex-shrink: 0; /* Prevent the label from shrinking */
+}
+
+.total-estimation-item-value {
+  color: #555;
+  font-size: 16px;
+  text-align: right; /* Align values to the right for consistency */
+}
+
+@media (max-width: 768px) {
+  .total-estimation-item {
+    flex: 1 1 100%; /* On smaller screens, each item will take full width */
+    margin-right: 0;
+  }
+}
+
+.fraud-verification {
+  margin-bottom: 30px;
+}
+.fraud-verification table {
+  width: 100%;
+  border-collapse: collapse;
+}
+.fraud-verification th,
+.fraud-verification td {
+  padding: 10px;
+  border: 1px solid #ddd;
+  text-align: left;
+}
+.fraud-verification th {
+  background-color: #f0f0f0;
+  color: #333;
+}
+.status {
+  font-weight: bold;
+  color: #010101;
+}
+.status.failed {
+  color: #000000;
+}
+
+.photo-gallery {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px; /* Add space between images */
+  justify-content: center; /* Center the images horizontally */
+  padding: 20px;
+}
+
+.photo-item {
+  width: 200px; /* Set a fixed width for each image container */
+  height: 200px; /* Set a fixed height */
+  overflow: hidden; /* Ensure images don't overflow */
+  border-radius: 8px; /* Optional: rounded corners for a clean look */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+}
+
+.photo-item img {
+  width: 100%; /* Make sure the image fills the container */
+  height: 100%; /* Ensure the image takes up full height of the container */
+  object-fit: cover; /* Ensure the image scales to cover the container while maintaining its aspect ratio */
+  border-radius: 8px; /* Optional: match the container's rounded corners */
+}
