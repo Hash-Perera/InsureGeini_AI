@@ -47,6 +47,11 @@ class InsuranceClaimEngine(KnowledgeEngine):
         part = self.facts[1]['part']
         self.rule_decisions[part] = {"decision": "Replace", "reason": "High severity dent."}
 
+    @Rule(Damage(damage_type='No Type Detected'))
+    def rule_7(self):
+        part = self.facts[1]['part']
+        self.rule_decisions[part] = {"decision": "Null", "reason": "No Damage Type detected."}
+        
 def evaluate_rules(damaged_parts):
     """
     Evaluates the given damaged parts against predefined rules
