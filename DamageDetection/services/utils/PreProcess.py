@@ -108,7 +108,7 @@ class PreProcess:
             # Upload to S3
             s3_url = await upload_single_file(cropped_face_file, folder_path)
 
-            print(s3_url)
+            # print(s3_url)
 
             # # Define file name and upload
             # file_name = f"cropped_parts/{part_label}_{i}.jpg"

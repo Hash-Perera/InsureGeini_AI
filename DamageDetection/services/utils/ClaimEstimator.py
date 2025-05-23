@@ -1,7 +1,9 @@
 #from utils.RuleEngine import evaluate_rules
-from services.utils.NewRuleEngine import evaluate_rules
+from services.utils.BussinessRulesEngine import evaluate_rules
+from services.database import db
+from bson import ObjectId
 
-def estimate_claim(unified_vector):
+async def estimate_claim(unified_vector,claimId):
     #Temporary datastore for part prices
     part_prices = {
         "Runningboard-Damage": 100,
@@ -56,9 +58,22 @@ def estimate_claim(unified_vector):
         if descision["decision"] == "Replace":
             #get part price from database
             #get part time from database
+            #get vehicle model from database
+            
+            vehicleIdDoc = await db.claims.find_one({"_id": ObjectId(claimId)},{"vehicleId":1, "_id": 0})
+
+            vehicleId = vehicleIdDoc["vehicleId"]
+
+            vehicle = await db.vehicles.find_one({"_id": vehicleId},{"vehicleModel":1, "_id": 0})
+            model = vehicle["vehicleModel"]
+
+            doc = await db.part_prices.find_one({"part": damage["part"], "model": model},{"_id": 0, "price": 1, "time": 1})
+            price=doc["price"]
+            time=doc["time"]
+            
             #get labor cost from database
             damage["severity"] = "severe"
-            replacement_cost = part_prices.get(damage["part"],0) + (labour_cost * part_times.get(damage["part"],0))
+            replacement_cost = price + (labour_cost * time)
             damage["cost"] = replacement_cost
         else:
             for type in damage["damageType"]:   
