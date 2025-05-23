@@ -1,7 +1,5 @@
 import cv2
-import numpy as np
 import easyocr
-import matplotlib.pyplot as plt
 from deepface import DeepFace
 from mtcnn import MTCNN
 import re
@@ -166,28 +164,3 @@ def read_license(image_path):
             "license_data": None,
            
         }
-
-
-def visualize_results(license_img_path, driver_img_path, results):
-    # Load images
-    license_img = cv2.imread(license_img_path)
-    driver_img = cv2.imread(driver_img_path)
-
-    # Display images
-    fig, ax = plt.subplots(1, 2, figsize=(10, 5))
-    ax[0].imshow(cv2.cvtColor(license_img, cv2.COLOR_BGR2RGB))
-    ax[0].set_title("License Image")
-    ax[0].axis('off')
-
-    ax[1].imshow(cv2.cvtColor(driver_img, cv2.COLOR_BGR2RGB))
-    ax[1].set_title("Driver Image")
-    ax[1].axis('off')
-
-    plt.show()
-
-    # Display results
-    print("Results:")
-    print("Verified:", results['verified'])
-    print("Model Results:")
-    for model_result in results['model_results']:
-        print(f"{model_result['Model']}: {model_result['result']}")
