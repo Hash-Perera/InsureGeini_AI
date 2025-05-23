@@ -29,52 +29,92 @@ def get_pipeline():
 
 
 async def damage_Detector(claimId):
- #Add db calls to get the obd codes from claims collection
-    claim = await db.claims.find_one({"_id": ObjectId(claimId)},{"damageImages":1, "_id": 0})
-    obd_codes = claim.get("obdCodes", "") if claim else ""
-    obd_codes_list = obd_codes.split(',') if obd_codes else []
-
-    # if not claim:
-    #     raise HTTPException(status_code=404, detail="Claim not found")
-    
-    print(claim)
-    
-    img_url = claim["damageImages"][0]
-
-    image = get_image_from_s3(img_url)
-
-    #Creating a pipeline object
-    pipeline = get_pipeline()
-    
-    
-    #send the obd codes too
-    result = await pipeline.process_image(image,obd_codes_list,claimId)
-    
-    detection_docs = []
-    for d in result:
-        detection_docs.append(
-            DetectionModel(
-                claimId=ObjectId(claimId),
-                part=d["part"],
-                damageType=d["damageType"],
-                severity=d["severity"],
-                obd_code=d["obd_code"],
-                internal=d["internal"],
-                decision=d["decision"],
-                reason=d["reason"],
-                image_url=d["image_url"],
-                cost=d["cost"],
-                flag=d["flag"]
-            ).model_dump(exclude_unset=True)
+    try:
+        # Step 1: Fetch claim data
+        try:
+            claim = await db.claims.find_one(
+                {"_id": ObjectId(claimId)},
+                {"damageImages": 1, "obdCodes": 1, "_id": 0}
             )
+            if not claim:
+                print(f"[ERROR] Claim not found for ID: {claimId}")
+                return {"status": "error", "message": "Claim not found."}
+        except Exception as db_error:
+            print(f"[CRITICAL] Failed to retrieve claim data: {db_error}")
+            return {"status": "error", "message": "Database query failed."}
 
-    
-    inserted_results = await db.detections.insert_many(detection_docs)
+        # Step 2: Extract and validate OBD codes
+        try:
+            obd_codes = claim.get("obdCodes", "")
+            obd_codes_list = obd_codes.split(",") if obd_codes else []
+        except Exception as code_error:
+            print(f"[ERROR] Failed to process OBD codes: {code_error}")
+            obd_codes_list = []
 
-    print(inserted_results)
+        # Step 3: Extract and load image
+        try:
+            image_urls = claim.get("damageImages", [])
+            if not image_urls:
+                print("[ERROR] No damage images found in claim.")
+                return {"status": "error", "message": "No damage images provided."}
 
-    # Destroying the pipeline object after processing
-    del pipeline
-    gc.collect()
+            img_url = image_urls[0]
+            image = get_image_from_s3(img_url)
+        except Exception as image_error:
+            print(f"[ERROR] Failed to load damage image from S3: {image_error}")
+            return {"status": "error", "message": "Image loading failed."}
 
-    return {"message": "Damage Detection Completed"}
+        # Step 4: Create and use AI pipeline
+        try:
+            pipeline = get_pipeline()
+            result = await pipeline.process_image(image, obd_codes_list, claimId)
+
+            print(result)
+
+            if result is None or not isinstance(result, list):
+                print(f"[FATAL] process_image() returned invalid result.")
+                return {"status": "error", "message": "Image processing failed."}
+        except Exception as pipeline_error:
+            print(f"[CRITICAL] Pipeline processing failed: {pipeline_error}")
+            return {"status": "error", "message": "AI pipeline execution failed."}
+
+        # Step 5: Structure detection documents
+        detection_docs = []
+        try:
+            for d in result:
+                detection_docs.append(
+                    DetectionModel(
+                        claimId=ObjectId(claimId),
+                        part=d.get("part", "Unknown"),
+                        damageType=d.get("damageType", []),
+                        severity=d.get("severity", "Unknown"),
+                        obd_code=d.get("obd_code", False),
+                        internal=d.get("internal", "Not detected"),
+                        decision=d.get("decision", "Null"),
+                        reason=d.get("reason", "Unknown"),
+                        image_url=d.get("image_url", ""),
+                        cost=d.get("cost", 0),
+                        flag=d.get("flag", "-")
+                    ).model_dump(exclude_unset=True)
+                )
+        except Exception as doc_error:
+            print(f"[ERROR] Failed to build detection document: {doc_error}")
+            return {"status": "error", "message": "Failed to structure result."}
+
+        # Step 6: Insert results to database
+        try:
+            inserted_results = await db.detections.insert_many(detection_docs)
+            print(f"[INFO] Inserted detection results: {inserted_results.inserted_ids}")
+        except Exception as insert_error:
+            print(f"[ERROR] Failed to insert detections: {insert_error}")
+            return {"status": "error", "message": "Failed to store results."}
+
+        # Step 7: Cleanup
+        del pipeline
+        gc.collect()
+
+        return {"status": "success", "message": "Damage Detection Completed"}
+
+    except Exception as e:
+        print(f"[FATAL] damage_Detector crashed: {e}")
+        return {"status": "error", "message": "Unexpected server error during damage detection."}

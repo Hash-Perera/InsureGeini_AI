@@ -60,21 +60,43 @@ async def estimate_claim(unified_vector,claimId):
             #get part time from database
             #get vehicle model from database
             
-            vehicleIdDoc = await db.claims.find_one({"_id": ObjectId(claimId)},{"vehicleId":1, "_id": 0})
+            try:
 
-            vehicleId = vehicleIdDoc["vehicleId"]
+                vehicleIdDoc = await db.claims.find_one({"_id": ObjectId(claimId)},{"vehicleId":1, "_id": 0})
 
-            vehicle = await db.vehicles.find_one({"_id": vehicleId},{"vehicleModel":1, "_id": 0})
-            model = vehicle["vehicleModel"]
+                if not vehicleIdDoc:
+                    raise ValueError(f"Claim ID '{claimId}' not found.")
 
-            doc = await db.part_prices.find_one({"part": damage["part"], "model": model},{"_id": 0, "price": 1, "time": 1})
-            price=doc["price"]
-            time=doc["time"]
-            
-            #get labor cost from database
-            damage["severity"] = "severe"
-            replacement_cost = price + (labour_cost * time)
-            damage["cost"] = replacement_cost
+                vehicleId = vehicleIdDoc["vehicleId"]
+
+                vehicle = await db.vehicles.find_one({"_id": vehicleId},{"vehicleModel":1, "_id": 0})
+
+                if not vehicle:
+                    raise ValueError(f"Vehicle with ID '{vehicleId}' not found.")
+                
+                model = vehicle["vehicleModel"]
+
+                doc = await db.part_prices.find_one({"part": damage["part"], "model": model},{"_id": 0, "price": 1, "time": 1})
+
+                if not doc:
+                    raise ValueError(f"No price info for part '{damage['part']}' and model '{model}'.")
+                
+                price=doc["price"]
+                time=doc["time"]
+                
+                #get labor cost from database
+                damage["severity"] = "severe"
+                replacement_cost = price + (labour_cost * time)
+                damage["cost"] = replacement_cost
+
+            except Exception as db_error:
+                print("Error fetching data from database:", db_error)
+                # If the part price is not found in the database, use the temporary datastore
+                damage["cost"] = 0
+                damage["decision"] = "Null"
+                damage["reason"] = f"DB lookup failed for replacement: {str(db_error)}"
+                print(f"[DB ERROR] Failed for part '{damage.get('part')}'. Reason: {db_error}")
+
         else:
             for type in damage["damageType"]:   
                 
@@ -91,6 +113,6 @@ async def estimate_claim(unified_vector,claimId):
                     damage["cost"] = repair_cost
                 
             
-        total_cost = total_cost + damage["cost"]
+        total_cost = total_cost + damage.get("cost", 0)
 
     return total_cost
