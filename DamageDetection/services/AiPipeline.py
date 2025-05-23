@@ -6,7 +6,7 @@
 import pandas as pd
 import matplotlib.pyplot as plt
 from tabulate import tabulate
-from services.utils.NewRuleEngine import evaluate_rules
+from services.utils.BussinessRulesEngine import evaluate_rules
 from services.utils.ClaimEstimator import estimate_claim
 
 class AiPipeline:
@@ -61,20 +61,6 @@ class AiPipeline:
         # print(unified_vector)
 
         
-        claim = estimate_claim(unified_vector)
-
-        # print("Claim estimate : ",claim)
-
-        #To be removed
-
-        # Convert list values in 'damageType' column to comma-separated strings
-        # for entry in unified_vector:
-        #     entry['damageType'] = ', '.join(entry['damageType'])
-
-        # # Create a tabulated format for display
-        # table = tabulate(final_result, headers="keys", tablefmt="grid")
-
-        # # Print the formatted table
-        # print(table)
+        claim = await estimate_claim(unified_vector,claimId)
 
         return unified_vector

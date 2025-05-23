@@ -31,7 +31,8 @@ def get_pipeline():
 async def damage_Detector(claimId):
  #Add db calls to get the obd codes from claims collection
     claim = await db.claims.find_one({"_id": ObjectId(claimId)},{"damageImages":1, "_id": 0})
-    obd_codes = ["B3108","B0050"]
+    obd_codes = claim.get("obdCodes", "") if claim else ""
+    obd_codes_list = obd_codes.split(',') if obd_codes else []
 
     # if not claim:
     #     raise HTTPException(status_code=404, detail="Claim not found")
@@ -42,21 +43,12 @@ async def damage_Detector(claimId):
 
     image = get_image_from_s3(img_url)
 
-    # image = download_image_from_s3(img_url)
-
-    # try:
-    #     response = requests.get(img_url, timeout=10)  # Fetch image from URL
-    #     response.raise_for_status()  # Check for HTTP errors
-    #     image_bytes = response.content  # Get image data
-    #     image = Image.open(io.BytesIO(image_bytes))  # Open image with PIL
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Failed to fetch image from URL: {str(e)}")
-
+    #Creating a pipeline object
     pipeline = get_pipeline()
-    image_path = "C:/Users/user/Desktop/SLIIT/Year 4 Semester 1/Demo Images/detectionTest1.jpg"
+    
     
     #send the obd codes too
-    result = await pipeline.process_image(image,obd_codes,claimId)
+    result = await pipeline.process_image(image,obd_codes_list,claimId)
     
     detection_docs = []
     for d in result:
