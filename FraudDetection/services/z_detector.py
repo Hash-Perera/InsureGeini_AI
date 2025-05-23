@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse
 from database import claim_collection, get_detections_images_current_claim, get_similar_claims,get_detections_images_similar_claims, verify_connection
 from bson import ObjectId
 from services.s_damage_compare import damage_compare
+from services.s_damage_compare_improved import damage_compare_improved
 from services.s_driving_licence import face_compare
 from services.aws.aws_download import download_file_from_url
 import time
@@ -10,6 +11,8 @@ from dotenv import load_dotenv
 from openai import OpenAI 
 import re
 import os
+
+from services.s_driving_licence_improved import face_compare_improved
 
 load_dotenv()
 
@@ -32,7 +35,8 @@ async def excute_fraud_detector(claimId):
             license_path = download_file_from_url(claim["drivingLicenseFront"])
             driver_path = download_file_from_url(claim["driverFace"])
             #! Detect Face Logic
-            faceResult = await face_compare(license_path, driver_path, claim["drivingLicenseFront"] , claim["driverFace"])
+            # faceResult = await face_compare(license_path, driver_path, claim["drivingLicenseFront"] , claim["driverFace"])
+            faceResult = await face_compare_improved(license_path, driver_path, claim["drivingLicenseFront"] , claim["driverFace"])
         except Exception as e:
             faceResult = {
                 "status": False, 
@@ -176,7 +180,8 @@ async def excute_fraud_detector(claimId):
             if len(similer_damageurl) > 2:
                 similer_damageurl = similer_damageurl[:2]
 
-            similarity_score = damage_compare(current_damageurl, similer_damageurl)
+            # similarity_score = damage_compare(current_damageurl, similer_damageurl)
+            similarity_score = damage_compare_improved(current_damageurl, similer_damageurl)
 
            
         except Exception as e:

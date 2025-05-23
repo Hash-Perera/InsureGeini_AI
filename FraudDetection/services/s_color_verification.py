@@ -1,5 +1,4 @@
 import cv2
-import numpy as np
 
 # Define HSV color ranges
 COLOR_RANGES = {
@@ -35,44 +34,44 @@ def preprocess_image(image):
     return blurred
 
 def detect_vehicle_color(image_path):
-    """ Detect the dominant color of the vehicle by analyzing the center area of the image with preprocessing. """
+    # """ Detect the dominant color of the vehicle by analyzing the center area of the image with preprocessing. """
     
-    # Read image
-    image = cv2.imread(image_path)
+    # # Read image
+    # image = cv2.imread(image_path)
 
-    if image is None:
-        return "error: invalid image"
+    # if image is None:
+    #     return "error: invalid image"
 
-    # Get image dimensions
-    height, width, _ = image.shape
+    # # Get image dimensions
+    # height, width, _ = image.shape
 
-    # Define center region (50% width and height)
-    center_x, center_y = width // 2, height // 2
-    region_width, region_height = width // 2, height // 2
+    # # Define center region (50% width and height)
+    # center_x, center_y = width // 2, height // 2
+    # region_width, region_height = width // 2, height // 2
 
-    # Crop the center area
-    x1, y1 = center_x - region_width // 2, center_y - region_height // 2
-    x2, y2 = center_x + region_width // 2, center_y + region_height // 2
-    cropped_image = image[y1:y2, x1:x2]
+    # # Crop the center area
+    # x1, y1 = center_x - region_width // 2, center_y - region_height // 2
+    # x2, y2 = center_x + region_width // 2, center_y + region_height // 2
+    # cropped_image = image[y1:y2, x1:x2]
 
-    # Apply preprocessing
-    processed_image = preprocess_image(cropped_image)
+    # # Apply preprocessing
+    # processed_image = preprocess_image(cropped_image)
 
-    # Convert processed image to HSV
-    hsv = cv2.cvtColor(processed_image, cv2.COLOR_BGR2HSV)
+    # # Convert processed image to HSV
+    # hsv = cv2.cvtColor(processed_image, cv2.COLOR_BGR2HSV)
 
-    # Check each color range
-    for color_name, (lower, upper) in COLOR_RANGES.items():
-        lower = np.array(lower, dtype=np.uint8)
-        upper = np.array(upper, dtype=np.uint8)
+    # # Check each color range
+    # for color_name, (lower, upper) in COLOR_RANGES.items():
+    #     lower = np.array(lower, dtype=np.uint8)
+    #     upper = np.array(upper, dtype=np.uint8)
 
-        # Create a mask for the color
-        mask = cv2.inRange(hsv, lower, upper)
+    #     # Create a mask for the color
+    #     mask = cv2.inRange(hsv, lower, upper)
 
-        # Calculate the percentage of the detected color in the center region
-        percentage = (np.count_nonzero(mask) / mask.size) * 100
+    #     # Calculate the percentage of the detected color in the center region
+    #     percentage = (np.count_nonzero(mask) / mask.size) * 100
 
-        if percentage > 20:  # If more than 20% of the center region matches the color
-            return color_name
+    #     if percentage > 20:  # If more than 20% of the center region matches the color
+    #         return color_name
 
     return "Unknown"

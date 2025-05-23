@@ -23,3 +23,10 @@ uvicorn main:app --reload
 
 Fraud Detection
 Version 1.0.0
+
+=========== Create ECS First Deployement =============
+
+removed tensorfloor_intel package
+
+1. docker build -t fraud_detection .
+2. docker run --env-file .env -p 8002:8002 fraud_detection
