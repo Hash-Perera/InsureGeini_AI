@@ -20,6 +20,7 @@ database = client.InsureGeini
 claim_collection = database.get_collection("claims")
 fraud_collection = database.get_collection("frauds")
 detection_collection = database.get_collection("detections")
+roles_collection = database.get_collection("roles")
 
 # Function to verify connection
 async def verify_connection():
@@ -99,3 +100,8 @@ async def get_detections_images_similar_claims(similar_claims):
     image_urls = [doc["image_url"] for doc in await detections.to_list(length=None)]
     
     return image_urls
+
+
+async def get_roles():
+    roles = await roles_collection.find().to_list(length=None)
+    return [role.get('name') for role in roles if role.get('name') is not None]
