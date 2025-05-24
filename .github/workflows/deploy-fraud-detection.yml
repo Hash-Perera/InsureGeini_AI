@@ -34,18 +34,9 @@ jobs:
           docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./FraudDetection
           docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
 
-      - name: Download Task Definition
-        id: task-def
-        uses: aws-actions/amazon-ecs-render-task-definition@v1
+      - name: Update ECS service with new image
+        uses: aws-actions/aws-ecs-update-service@v1
         with:
-          task-definition: fraud_detection_task:2
-          container-name: fraud_detection
-          image: 779846808174.dkr.ecr.us-east-1.amazonaws.com/fraud_detection:latest
-      
-      - name: Deploy to ECS
-        uses: aws-actions/amazon-ecs-deploy-task-definition@v1
-        with:
-          task-definition: ${{ steps.task-def.outputs.task-definition }}
-          service: fraud_detection_service
           cluster: InsureGeiniCluster
-          wait-for-service-stability: true
+          service: fraud_detection_service
+          image: 779846808174.dkr.ecr.us-east-1.amazonaws.com/fraud_detection:latest
