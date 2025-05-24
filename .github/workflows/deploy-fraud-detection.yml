@@ -1,19 +1,28 @@
-name: Deploy FraudDetection Service
+name: Deploy FraudDetection to ECS
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
     paths:
       - 'FraudDetection/**'
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 779846808174
+  ECR_BACKEND_IMAGE: fraud_detection
+  ECS_CLUSTER: InsureGeiniCluster
+  ECS_SERVICE: fraud_detection_service
 
 jobs:
   deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Configure AWS credentials
         uses: aws-actions/configure-aws-credentials@v2
@@ -22,21 +31,22 @@ jobs:
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: us-east-1
 
-      - name: Log in to Amazon ECR
-        uses: aws-actions/amazon-ecr-login@v2
-
-      - name: Build, tag, and push Docker image
-        env:
-          ECR_REGISTRY: 779846808174.dkr.ecr.us-east-1.amazonaws.com
-          ECR_REPOSITORY: fraud_detection
-          IMAGE_TAG: latest
+      - name: Login to Amazon ECR
         run: |
-          docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG ./FraudDetection
-          docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 779846808174.dkr.ecr.us-east-1.amazonaws.com
 
-      - name: Update ECS service with new image
-        uses: aws-actions/aws-ecs-update-service@v1
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URI=779846808174.dkr.ecr.us-east-1.amazonaws.com/fraud_detection:latest
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker build -t $IMAGE_URI ./FraudDetection
+          docker push $IMAGE_URI
+
+      - name: Force ECS service deployment
+        uses: imehedi/actions-awscli-v2@latest
         with:
-          cluster: InsureGeiniCluster
-          service: fraud_detection_service
-          image: 779846808174.dkr.ecr.us-east-1.amazonaws.com/fraud_detection:latest
+          args: ecs update-service --cluster InsureGeiniCluster --service fraud_detection_service --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
