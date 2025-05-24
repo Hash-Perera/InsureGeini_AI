@@ -38,7 +38,7 @@ jobs:
         id: task-def
         uses: aws-actions/amazon-ecs-render-task-definition@v1
         with:
-          task-definition: fraud_detection_task
+          task-definition: fraud_detection_task:2
           container-name: fraud_detection
           image: 779846808174.dkr.ecr.us-east-1.amazonaws.com/fraud_detection:latest
       
