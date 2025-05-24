@@ -56,7 +56,7 @@ app = FastAPI(lifespan=lifespan)
     
 @app.get("/")
 async def healthCheck():
-    return "Hello, Fraud Detection Server is running CI/CD.... New!"
+    return "Hello, Fraud Detection Server is running CI/CD.... ?!"
 
 @app.get("/roles")
 async def health():
