@@ -13,7 +13,7 @@ from services.s_color_verification import detect_vehicle_color
 from services.z_detector import excute_fraud_detector
 from services.s_vehicle_model_detection import predict_vehicle_class
 
-from database import claim_collection, verify_connection
+from database import claim_collection, verify_connection, get_roles
 from bson import ObjectId
 from services.aws.aws_download import download_file_from_url
 
@@ -56,7 +56,11 @@ app = FastAPI(lifespan=lifespan)
     
 @app.get("/")
 async def healthCheck():
-    return "Hello, Fraud Detection Server is running!"
+    return "Hello, Fraud Detection Server is running CI/CD test!"
+
+@app.get("/roles")
+async def health():
+    return await get_roles()
 
 #!----------- This is the real function that will be called when the script is run ------------//
 @app.get("/execute-fraud-detection")
