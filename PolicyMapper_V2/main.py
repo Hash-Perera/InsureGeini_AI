@@ -224,7 +224,7 @@ async def main(claim_id: str | ObjectId) -> dict:
     return final_result
  
 @app.get("/", response_model=None)
-async def read_root(claim_id: str = "67a1cacfeace4f9501a8c964") -> dict:
+async def read_root(claim_id: str = "") -> dict:
     logger.info(f"Received request for claim_id: {claim_id}")
     await main(claim_id)
     return {"Hello": "World"}
