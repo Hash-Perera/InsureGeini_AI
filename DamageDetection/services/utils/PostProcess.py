@@ -31,48 +31,85 @@ class PostProcess:
         # Loop through each detected damaged part
         for part_id, (part_box, part_label) in enumerate(damaged_parts):
 
-            matched_damages = []
-            matchfound = False
+            try:
+                matched_damages = []
+                matchfound = False
 
-            #count += 1
-            # Loop through each detected damage type
-            for damage_id, (damage_box, damage_label) in enumerate(damage_types):
-                intersection = self.compute_intersection(part_box, damage_box)  # Compute Intersection precentage between part and damage type
+                #count += 1
+                # Loop through each detected damage type
+                for damage_id, (damage_box, damage_label) in enumerate(damage_types):
+                    try:
 
-                if intersection >= i_threshold:
-                    #matches[str(count)+" "+part_label].append(damage_label)
-                    matched_damages.append(damage_label)
-                    matchfound = True
+                        intersection = self.compute_intersection(part_box, damage_box)  # Compute Intersection precentage between part and damage type
 
-            if not matchfound:
-                matched_damages.append("No Type Detected")
+                        if intersection >= i_threshold:
+                            #matches[str(count)+" "+part_label].append(damage_label)
+                            matched_damages.append(damage_label)
+                            matchfound = True
+                    
+                    except Exception as e:
+                        print(f"[ERROR] Failed to compare damage box at index {damage_id} with part {part_label}. Error: {e}")
+                        matched_damages.append("Error: Intersection Failed")
 
-            
-            matched_parts.append({
-                "id": part_id+1,
-                "part": part_label,
-                "damageType": matched_damages,
-            })
+                if not matchfound:
+                    matched_damages.append("No Type Detected")
+
+                
+                matched_parts.append({
+                    "id": part_id+1,
+                    "part": part_label,
+                    "damageType": matched_damages,
+                })
+
+            except Exception as e:
+                print(f"[FATAL] Failed to process part at index {part_id}. Error: {e}")
+                matched_parts.append({
+                    "id": part_id + 1,
+                    "part": "Unknown",
+                    "damageType": ["Error: Part processing failed"]
+                })
 
         return matched_parts
     
     def create_vector(self,partSeverity,damageParts,cropped_images_s3):
-        
-        if len(damageParts) != len(partSeverity):
-            print("Error: Length of part severity and damage parts do not match.")
-            return None
-        
-        for i,part in enumerate(damageParts):
-            if i< len(partSeverity):
-                part_name,severity = partSeverity[i]
-                if part["part"] == part_name:
-                    part["severity"] = severity
-                    for s3_url, label in cropped_images_s3:
-                        if label == part_name:
-                            part["image_url"] = s3_url
-                            break
+        try:
 
-        return damageParts
+            if len(damageParts) != len(partSeverity):
+                print("Error: Length of part severity and damage parts do not match.")
+                return None
+            
+            for i,part in enumerate(damageParts):
+                if i< len(partSeverity):
+                    try:
+
+                        part_name,severity = partSeverity[i]
+                        if part["part"] == part_name:
+                            part["severity"] = severity
+                            for entry in cropped_images_s3:
+                                try:
+                                    s3_url, label = entry
+                                    if label == part_name:
+                                        part["image_url"] = s3_url
+                                        break
+                                except Exception as s3_error:
+                                    print(f"[ERROR] Failed to unpack cropped image at index {cropped_images_s3.index(entry)}: {s3_error}")
+                                    part["image_url"] = "Error: Invalid S3 data"
+
+                    except Exception as part_error:
+                        print(f"[ERROR] Failed to apply severity/image to part at index {i}: {part_error}")
+                        part["severity"] = "Unknown"
+                        part["image_url"] = "Error: Processing failed"
+
+                else:
+                    print(f"[WARN] No matching severity info for part index {i}. Skipping.")
+                    part["severity"] = "Unknown"
+                    part["image_url"] = "Skipped: No severity info"
+
+            return damageParts
+        
+        except Exception as e:
+            print(f"[FATAL] Failed to create vector: {e}")
+            return None
     
     #To be changed or removed
     async def create_unified_vector(self,external_vector,codes):

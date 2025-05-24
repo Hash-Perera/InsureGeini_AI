@@ -55,6 +55,10 @@ class AiPipeline:
         #Final result
         final_result = self.postprocessor.create_vector(results["PartSeverity"],postprocessed_results,cropped_images_s3)
 
+        if final_result is None:
+            print("[FATAL] create_vector returned None — damage vector not created.")
+            return None
+
         #To be changed to add the internal damages properly
         unified_vector = await self.postprocessor.create_unified_vector(final_result,obd_codes)
 

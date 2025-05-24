@@ -37,19 +37,43 @@ class DamageActions(BaseActions):
     @rule_action()
     def repair(self):
         rule_decisions[self.part_name] = {
-            "decision": "Repair", "reason": "Rule matched: repair"
+            "decision": "Repair", "reason": "Only minor scratches detected."
+        }
+    
+    @rule_action()
+    def repair_minor(self):
+        rule_decisions[self.part_name] = {
+            "decision": "Repair", "reason": "Only minor dent detected."
+        }
+
+    @rule_action()
+    def repair_moderate(self):
+        rule_decisions[self.part_name] = {
+            "decision": "Repair", "reason": "Moderate damages detected"
         }
 
     @rule_action()
     def replace(self):
         rule_decisions[self.part_name] = {
-            "decision": "Replace", "reason": "Rule matched: replace"
+            "decision": "Replace", "reason": "Broken part must replace"
+        }
+
+    @rule_action()
+    def replace_moderate(self):
+        rule_decisions[self.part_name] = {
+            "decision": "Replace", "reason": "Moderate damages with OBD sensor errors."
+        }
+
+    @rule_action()
+    def replace_severe(self):
+        rule_decisions[self.part_name] = {
+            "decision": "Replace", "reason": "Severly damaged part must replace"
         }
 
     @rule_action()
     def null_decision(self):
         rule_decisions[self.part_name] = {
-            "decision": "Null", "reason": "No Damage Type detected."
+            "decision": "Null", "reason": "No Decision taken"
         }
 
 # -------------------------------
@@ -63,7 +87,7 @@ business_rules = [
                 {"name": "severity", "operator": "equal_to", "value": "minor"}
             ]
         },
-        "actions": [{"name": "repair"}]
+        "actions": [{"name": "repair_minor"}]
     },
     {
         "conditions": {
@@ -73,7 +97,7 @@ business_rules = [
                 {"name": "obd_code", "operator": "is_true", "value": True}
             ]
         },
-        "actions": [{"name": "replace"}]
+        "actions": [{"name": "replace_moderate"}]
     },
     {
         "conditions": {
@@ -83,7 +107,7 @@ business_rules = [
                 {"name": "obd_code", "operator": "is_false", "value": False}
             ]
         },
-        "actions": [{"name": "repair"}]
+        "actions": [{"name": "repair_moderate"}]
     },
     {
         "conditions": {
@@ -110,7 +134,7 @@ business_rules = [
                 {"name": "severity", "operator": "equal_to", "value": "severe"}
             ]
         },
-        "actions": [{"name": "replace"}]
+        "actions": [{"name": "replace_severe"}]
     },
     {
         "conditions": {
@@ -130,27 +154,46 @@ def evaluate_rules(damaged_parts):
     global rule_decisions
     rule_decisions = {}
 
-    part_name = damaged_parts["part"]
-    severity = damaged_parts["severity"]
-    damage_types = damaged_parts["damageType"]
-    obd_code = damaged_parts.get("obd_code", False)
+    try:
+        part_name = damaged_parts["part"]
+        severity = damaged_parts["severity"]
+        damage_types = damaged_parts["damageType"]
+        obd_code = damaged_parts.get("obd_code", False)
 
-    for damage_type in damage_types:
-        part_data = {
-            "damage_type": damage_type,
-            "severity": severity,
-            "obd_code": obd_code
-        }
+        for damage_type in damage_types:
+            part_data = {
+                "damage_type": damage_type,
+                "severity": severity,
+                "obd_code": obd_code
+            }
 
-        run_all(
-            rule_list=business_rules,
-            defined_variables=DamageVariables(part_data),
-            defined_actions=DamageActions(part_name),
-            stop_on_first_trigger=True
-        )
+            try:
+                run_all(
+                    rule_list=business_rules,
+                    defined_variables=DamageVariables(part_data),
+                    defined_actions=DamageActions(part_name),
+                    stop_on_first_trigger=True
+                )
+            except Exception as e:
+                # Handle rule execution failure
+                rule_decisions[part_name] = {
+                    "decision": "Null",
+                    "reason": f"Rule evaluation failed: {str(e)}"
+                }
+                print(f"[ERROR] Failed to evaluate rules for part: {part_name}. Error: {e}")
 
-    if part_name in rule_decisions:
-        damaged_parts["decision"] = rule_decisions[part_name]["decision"]
-        damaged_parts["reason"] = rule_decisions[part_name]["reason"]
+        if part_name in rule_decisions:
+            damaged_parts["decision"] = rule_decisions[part_name]["decision"]
+            damaged_parts["reason"] = rule_decisions[part_name]["reason"]
+        else:
+            # No matching rules Default fallback
+            damaged_parts["decision"] = "Null"
+            damaged_parts["reason"] = "No matching rules triggered."
+
+    except Exception as e:
+        # Handle malformed input or total failure
+        damaged_parts["decision"] = "Null"
+        damaged_parts["reason"] = f"Rule engine error: {str(e)}"
+        print(f"[FATAL] Rule engine failed for input: {damaged_parts}. Error: {e}")
 
     return damaged_parts
