@@ -1,4 +1,3 @@
-# tests/test_main_real.py
 from fastapi.testclient import TestClient
 from main import app
 
