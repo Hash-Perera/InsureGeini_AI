@@ -1,7 +1,6 @@
 import cv2
 import easyocr
 import re
-import os
 from ultralytics import YOLO
 
 def read_insurance_card(image_path):
