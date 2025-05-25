@@ -229,6 +229,10 @@ async def read_root(claim_id: str = "") -> dict:
     await main(claim_id)
     return {"Hello": "World"}
 
+@app.get("/health")
+async def healthCheck():
+    return "Hello, Policy Mapper is running!"
+
 if __name__ == "_main_":
     import uvicorn
-    uvicorn.run(app, host="localhost", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8004)
