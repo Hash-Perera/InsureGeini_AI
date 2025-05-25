@@ -1,0 +1,52 @@
+# Bytecode files
+__pycache__
+*.pyc
+*.pyo
+*.pyd
+
+# Virtual environment directories
+venv/
+.env/
+.venv/
+
+# IDE or editor directories and files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Operating system files
+.DS_Store
+Thumbs.db
+
+# Logs and other runtime files
+*.log
+*.pot
+*.mo
+*.pid
+*.gz
+
+# Docker-related files
+docker-compose.override.yml
+
+# Test or coverage directories
+tests/
+test/
+*.cover
+*.coverage
+nosetests.xml
+coverage.xml
+
+# Environment files
+*.env
+
+# Build and distribution files
+build/
+dist/
+.eggs/
+*.egg-info/
+*.egg
+
+# Python-specific configuration files
+*.bak
+*.tmp

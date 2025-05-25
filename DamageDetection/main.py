@@ -36,7 +36,7 @@ app = FastAPI(lifespan=lifespan)
 
 @app.get("/")
 async def check():
-    return {"message": "FastAPI Active"}
+    return "Hello, Damage Detection Server is running"
 
 
 @app.post("/predict")
@@ -44,3 +44,7 @@ async def predict(request: DetectionRequest):
     print("call received")
     await damage_Detector(request.claimId)
     print(f"🔍 Processing damage detection for: {request.claimId}")
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8001)
