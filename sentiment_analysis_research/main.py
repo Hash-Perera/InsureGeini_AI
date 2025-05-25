@@ -15,7 +15,7 @@ async def healthcheck():
     """
     Healthcheck endpoint.
     """
-    return {"status": "Sentiment Analysis API is up and running!"}
+    return "Sentiment Analysis API is running CI/CD Tested!"
 
 @app.post("/feedback")
 async def predict_sentiment(request: FeedbackRequest):
@@ -47,3 +47,7 @@ async def predict_category(request: FeedbackRequest):
 
 # Run the FastAPI server using uvicorn (if required as standalone)
 # uvicorn app:app --reload
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8003)
+    # uvicorn.run("main:app", host="0.0.0.0", port=8003, reload=True)
