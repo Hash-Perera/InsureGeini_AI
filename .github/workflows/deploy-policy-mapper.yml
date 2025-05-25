@@ -1,0 +1,52 @@
+name: Deploy PolicyMapper to ECS
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "PolicyMapper_V2/**"
+
+env:
+  AWS_REGION: us-east-1
+  AWS_ACCOUNT_ID: 779846808174
+  ECR_BACKEND_IMAGE: policy_mapper
+  ECS_CLUSTER: InsureGeiniCluster
+  ECS_SERVICE: policy_mapper_service
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v2
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: us-east-1
+
+      - name: Login to Amazon ECR
+        run: |
+          aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 779846808174.dkr.ecr.us-east-1.amazonaws.com
+
+      - name: Build and push Docker image
+        run: |
+          IMAGE_URI=779846808174.dkr.ecr.us-east-1.amazonaws.com/policy_mapper:latest
+          echo "IMAGE_URI=$IMAGE_URI" >> $GITHUB_ENV
+          docker build -t $IMAGE_URI ./PolicyMapper_V2
+          docker push $IMAGE_URI
+
+      - name: Force ECS service deployment
+        uses: imehedi/actions-awscli-v2@latest
+        with:
+          args: ecs update-service --cluster InsureGeiniCluster --service policy_mapper_service --force-new-deployment
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1
