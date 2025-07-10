@@ -38,7 +38,7 @@ async def consume_and_forward():
             print("📡 Channel created")
             
             # Declare queue and print queue info
-            policy_queue = await channel.declare_queue("policy_queue", durable=True)
+            policy_queue = await channel.declare_queue("policy_queue", durable=True, passive=True)
             queue_info = await policy_queue.declare()
             print(f"📊 Queue Status:")
             print(f"   - Queue Name: {policy_queue.name}")
@@ -48,7 +48,7 @@ async def consume_and_forward():
             print("🎯 Starting to consume messages...")
             async for message in policy_queue:
                 print(f"📨 Received message: {message.message_id}")
-                async with message.process():
+                async with message.process():  # This will automatically ack if all goes well
                     try:
                         data = json.loads(message.body)
                         claimId = data.get('claimId')
@@ -75,6 +75,8 @@ async def consume_and_forward():
                         # Update the claim status to 'Policy Mapper Completed'
                         await update_claim_status_end(claimId)
                         print("✅ Message processed successfully")
+                                                
+                        print(f"✅ Message {message.message_id} acknowledged")
 
                     except Exception as e:
                         print(f"❌ Error processing message: {e}")
